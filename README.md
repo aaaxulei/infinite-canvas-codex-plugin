@@ -10,8 +10,11 @@
 要求：
 
 - Codex Desktop
-- Node.js 18 或更高版本
 - 能访问 Infinite Canvas feat 环境
+
+插件会自动使用系统 Node.js 或 Codex 自带的 Node.js，通常无需另外安装或配置
+`PATH`。如自动发现失败，可通过 `INFINITE_CANVAS_NODE` 指定 Node.js 可执行文件的
+绝对路径。
 
 执行：
 
@@ -21,6 +24,17 @@ codex plugin add infinite-canvas@aaaxulei
 ```
 
 安装完成后新建一个 Codex 任务，使 Plugin 和 MCP tools 被加载。
+
+## 升级
+
+已经安装过插件的同事执行：
+
+```bash
+codex plugin marketplace upgrade aaaxulei
+codex plugin add infinite-canvas@aaaxulei
+```
+
+升级完成后重启 Codex，并新建一个任务。
 
 ## 连接画布
 
@@ -53,6 +67,8 @@ codex plugin add infinite-canvas@aaaxulei
 plugins/infinite-canvas/
 ├── .codex-plugin/plugin.json
 ├── .mcp.json
-├── scripts/mcp-server.mjs
+├── scripts/
+│   ├── mcp-server.mjs
+│   └── start-mcp.sh
 └── skills/operate-infinite-canvas/
 ```

@@ -1,6 +1,6 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Inspect, edit, and run the active Infinite Canvas browser canvas from Codex.",
   "author": {
     "name": "Infinite Canvas Team"

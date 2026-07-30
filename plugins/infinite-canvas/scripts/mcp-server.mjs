@@ -6,7 +6,7 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.0" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.1" };
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const configPath =
   process.env.INFINITE_CANVAS_CONFIG
