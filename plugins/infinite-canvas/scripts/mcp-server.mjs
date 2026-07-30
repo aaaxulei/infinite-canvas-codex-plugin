@@ -6,7 +6,7 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.1" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.4" };
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const configPath =
   process.env.INFINITE_CANVAS_CONFIG
@@ -189,7 +189,8 @@ const tools = [
           items: { type: "object" },
           description:
             "Operations documented by the bundled skill: add_node, update_node, connect_nodes, "
-            + "delete_node, group_nodes, ungroup_nodes, set_viewport, load_snapshot, clear_canvas.",
+            + "delete_node, group_nodes, ungroup_nodes, focus_nodes, set_viewport, "
+            + "load_snapshot, clear_canvas.",
         },
       },
       required: ["expected_revision", "operations"],

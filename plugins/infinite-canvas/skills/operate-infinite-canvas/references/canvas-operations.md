@@ -4,6 +4,7 @@
 
 - Supported node types
 - Operation shapes
+- Generation defaults
 - Safe workflow pattern
 
 ## Supported node types
@@ -84,10 +85,30 @@ workflow. Infinite Canvas validates connection compatibility.
 
 ### Set viewport
 
+Prefer `focus_nodes` to raw viewport coordinates:
+
+```json
+{
+  "op": "focus_nodes",
+  "node_ids": ["prompt", "image"],
+  "padding": 0.24,
+  "min_zoom": 0.1,
+  "max_zoom": 1.2,
+  "duration": 320
+}
+```
+
+`node_ids` may contain real node IDs or refs created earlier in the same batch.
+Padding and zoom fields are optional. Put this operation after adding, connecting,
+or grouping the active task.
+
+Use raw viewport coordinates only when the user asks for a specific viewport:
+
 ```json
 {
   "op": "set_viewport",
-  "viewport": { "x": 20, "y": 30, "zoom": 0.8 }
+  "viewport": { "x": 20, "y": 30, "zoom": 0.8 },
+  "duration": 320
 }
 ```
 
@@ -103,10 +124,18 @@ workflow. Infinite Canvas validates connection compatibility.
 
 These are destructive. Prefer targeted operations.
 
+## Generation defaults
+
+For `img2video` or `videoGeneration` nodes in image-to-video mode, set
+`data.aspectRatio` to `auto` unless the user requests a specific ratio. If the
+selected model does not support aspect ratio selection, omit the field and let the
+model preserve the source image ratio.
+
 ## Safe workflow pattern
 
 1. Read the live snapshot and revision.
 2. Preserve existing node data fields not explicitly targeted.
 3. Create a single logical batch using temporary refs.
-4. Supply the read revision and a new idempotency key.
-5. Read again to verify complex changes.
+4. Focus the active task with `focus_nodes`.
+5. Supply the read revision and a new idempotency key.
+6. Read again to verify complex changes.

@@ -38,6 +38,20 @@ Supported operation shapes and node types are in
 [references/canvas-operations.md](references/canvas-operations.md). Read it before
 constructing a mutation.
 
+For generation or editing requests, follow
+[references/model-routing.md](references/model-routing.md). Prefer an explicit model
+chosen by the user. Otherwise apply the task-specific defaults without inventing
+Provider IDs.
+
+When adding nodes, focus the new task or its group. Put `focus_nodes` after the add,
+connect, and group operations in the same batch. The browser bridge also focuses
+newly created top-level nodes as a fallback. Do not repeatedly change the viewport
+while polling an execution.
+
+For image-to-video nodes, set `aspectRatio` to `auto` when the user did not request
+a specific ratio and the selected model supports automatic aspect ratio. Do not
+infer `16:9` or `9:16` only from the prompt.
+
 Treat `delete_node`, `clear_canvas`, and `load_snapshot` as destructive. Describe the
 scope and obtain confirmation unless the user already explicitly requested that
 exact destructive change.
@@ -48,6 +62,8 @@ Call `run_canvas_nodes` or `run_canvas_group`. These return immediately with an
 `execution_id`. Poll `get_canvas_execution` until `succeeded` or `failed`; report
 failed node messages without hiding them. Do not start the same run again while its
 execution is still `running`.
+
+Run commands automatically focus their target nodes or group before execution.
 
 Execution uses the application's queue and provider permissions. Do not bypass model
 permissions, create another queue worker, or call providers directly.
