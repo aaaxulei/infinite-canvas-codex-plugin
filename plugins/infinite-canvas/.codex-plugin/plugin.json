@@ -1,19 +1,20 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.4",
-  "description": "Inspect, edit, and run the active Infinite Canvas browser canvas from Codex.",
+  "version": "0.1.5",
+  "description": "Open Infinite Canvas in Chrome, then inspect, edit, and run the active browser canvas from Codex.",
   "author": {
     "name": "Infinite Canvas Team"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Infinite Canvas",
-    "shortDescription": "Control live Infinite Canvas workflows",
-    "longDescription": "Connect Codex to an authenticated Infinite Canvas browser session. Inspect snapshots, create or update nodes and edges, and start existing workflow execution without bypassing canvasStore.",
+    "shortDescription": "Open in Chrome and control live workflows",
+    "longDescription": "Open https://designer.etm.tech/ in the user's Chrome, then connect Codex to the authenticated Infinite Canvas browser session. Inspect snapshots, create or update nodes and edges, and start existing workflow execution without bypassing canvasStore.",
     "developerName": "Infinite Canvas Team",
     "category": "Productivity",
     "capabilities": ["Read", "Write", "Interactive"],
     "defaultPrompt": [
+      "Open Infinite Canvas in Chrome.",
       "Inspect my active Infinite Canvas and summarize its workflow.",
       "Add and connect nodes on my active Infinite Canvas.",
       "Run selected nodes and monitor the execution."

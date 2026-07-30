@@ -6,7 +6,8 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.4" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.5" };
+const CANVAS_APP_URL = "https://designer.etm.tech/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const configPath =
   process.env.INFINITE_CANVAS_CONFIG
@@ -60,8 +61,9 @@ async function request(path, { method = "GET", body, authenticated = true, apiUr
   const base = normalizeApiUrl(apiUrl || current.apiUrl);
   if (authenticated && !current.token) {
     throw new Error(
-      "Infinite Canvas is not paired. Open Infinite Canvas → user menu → 连接 Codex, "
-      + "then call pair_infinite_canvas with the displayed code.",
+      `Infinite Canvas is not paired. Open ${CANVAS_APP_URL} in Chrome, choose `
+      + "Infinite Canvas → user menu → 连接 Codex, then call pair_infinite_canvas "
+      + "with the displayed code.",
     );
   }
   const response = await fetch(`${base}${path}`, {
@@ -97,7 +99,8 @@ async function resolveSession(sessionId) {
   const sessions = Array.isArray(payload?.sessions) ? payload.sessions : [];
   if (sessions.length === 0) {
     throw new Error(
-      "No active Infinite Canvas browser canvas. Open a canvas and keep the tab visible.",
+      `No active Infinite Canvas browser canvas. Open ${CANVAS_APP_URL} in Chrome, `
+      + "sign in, and keep the canvas tab visible.",
     );
   }
   if (sessions.length > 1) {
