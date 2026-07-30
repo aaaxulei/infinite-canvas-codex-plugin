@@ -1,0 +1,20 @@
+{
+  "name": "aaaxulei",
+  "interface": {
+    "displayName": "Infinite Canvas Team"
+  },
+  "plugins": [
+    {
+      "name": "infinite-canvas",
+      "source": {
+        "source": "local",
+        "path": "./plugins/infinite-canvas"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

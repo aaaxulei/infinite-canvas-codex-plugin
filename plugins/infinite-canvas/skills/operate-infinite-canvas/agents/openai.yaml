@@ -1,0 +1,11 @@
+interface:
+  display_name: "Operate Infinite Canvas"
+  short_description: "Control live Infinite Canvas workflows from Codex"
+  default_prompt: "Use $operate-infinite-canvas to inspect and update my active canvas."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "infinite-canvas"
+      description: "Live Infinite Canvas browser control tools"
+policy:
+  allow_implicit_invocation: true

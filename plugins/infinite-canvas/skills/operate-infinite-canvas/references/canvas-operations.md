@@ -1,0 +1,112 @@
+# Canvas operation reference
+
+## Contents
+
+- Supported node types
+- Operation shapes
+- Safe workflow pattern
+
+## Supported node types
+
+Use these values for `add_node.node_type`:
+
+`imageOutput`, `text`, `videoGeneration`, `img2video`, `videoOutput`, `seedance`,
+`firstLastFrame`, `videoEffect`, `audioGeneration`, `textToSpeech`, `aiMusic`,
+`avatar`, `mediaAsset`, `llm`, `translate`, `promptList`, `imageList`, `outpaint`,
+`erase`, `videoProcess`, `videoResult`.
+
+Legacy video and audio entry types are normalized by Infinite Canvas to the unified
+`videoGeneration` and `audioGeneration` React Flow node types.
+
+## Operation shapes
+
+### Add a node
+
+```json
+{
+  "op": "add_node",
+  "ref": "prompt",
+  "node_type": "text",
+  "position": { "x": 100, "y": 200 },
+  "data": { "content": "A cinematic portrait" }
+}
+```
+
+`ref` is optional. It is resolved only inside the same operation batch.
+
+### Update a node
+
+```json
+{
+  "op": "update_node",
+  "node_id": "prompt",
+  "data": { "content": "Updated text" }
+}
+```
+
+`node_id` may be a real node ID or an earlier `ref`.
+
+### Connect nodes
+
+```json
+{
+  "op": "connect_nodes",
+  "source": "prompt",
+  "target": "image",
+  "source_handle": null,
+  "target_handle": "text-in"
+}
+```
+
+Handle fields are optional. Respect existing edge handle patterns when extending a
+workflow. Infinite Canvas validates connection compatibility.
+
+### Delete a node
+
+```json
+{ "op": "delete_node", "node_id": "node_123" }
+```
+
+### Group or ungroup
+
+```json
+{
+  "op": "group_nodes",
+  "ref": "group",
+  "node_ids": ["prompt", "image"],
+  "name": "Image workflow"
+}
+```
+
+```json
+{ "op": "ungroup_nodes", "group_id": "group" }
+```
+
+### Set viewport
+
+```json
+{
+  "op": "set_viewport",
+  "viewport": { "x": 20, "y": 30, "zoom": 0.8 }
+}
+```
+
+### Replace or clear
+
+```json
+{ "op": "load_snapshot", "snapshot": { "nodes": [], "edges": [] } }
+```
+
+```json
+{ "op": "clear_canvas" }
+```
+
+These are destructive. Prefer targeted operations.
+
+## Safe workflow pattern
+
+1. Read the live snapshot and revision.
+2. Preserve existing node data fields not explicitly targeted.
+3. Create a single logical batch using temporary refs.
+4. Supply the read revision and a new idempotency key.
+5. Read again to verify complex changes.
