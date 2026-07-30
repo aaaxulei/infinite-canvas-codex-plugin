@@ -1,7 +1,7 @@
 interface:
   display_name: "Operate Infinite Canvas"
-  short_description: "Open Infinite Canvas in Chrome and control live workflows"
-  default_prompt: "Use $operate-infinite-canvas to open Infinite Canvas in Chrome, then inspect and update my active canvas."
+  short_description: "Open Infinite Canvas, upload media, and control workflows"
+  default_prompt: "Use $operate-infinite-canvas to open Infinite Canvas in Chrome, upload my local media, then inspect and update my active canvas."
 dependencies:
   tools:
     - type: "mcp"

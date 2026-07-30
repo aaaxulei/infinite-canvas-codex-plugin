@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, or inspect, edit, connect, group, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, or run an Infinite Canvas workflow, including requests such as "打开画布" or "打开 Infinite Canvas", or to pair Codex with Infinite Canvas.
+description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, or run an Infinite Canvas workflow, including requests such as "打开画布" or "打开 Infinite Canvas", or to pair Codex with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -49,6 +49,27 @@ If tools report that the plugin is not paired:
 4. Base every mutation on the returned nodes, edges, and `revision`.
 5. Pass that exact revision as `expected_revision`. On a conflict, read again and
    rebuild the operation batch; do not blindly retry stale operations.
+
+## Upload local media
+
+Use `upload_local_assets_to_canvas` when the user explicitly supplies or authorizes
+local image, video, or audio files. The tool uploads them as private assets owned by
+the paired Infinite Canvas user and creates their media asset nodes in one canvas
+batch.
+
+1. Call `list_canvas_sessions` first. Pass `session_id` when more than one session
+   is active.
+2. Pass absolute local paths in `files[].file_path`. The tool accepts standard
+   image, video, and audio formats up to 512 MiB per file.
+3. Use `connect_to_node_id` and `target_handle` when the requested workflow already
+   identifies each downstream node. Otherwise create the asset nodes first, read
+   the returned node IDs, and connect them in the later workflow mutation.
+4. Never upload arbitrary files discovered on disk. Only upload paths the user
+   supplied or files created within the current authorized task. Never upload
+   credentials, configuration files, browser data, tokens, or unrelated content.
+5. The upload creates durable private assets even if a later canvas mutation fails.
+   Report any returned uploaded asset IDs so the user can recover them without
+   uploading duplicates.
 
 ## Mutate
 

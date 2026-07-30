@@ -2,13 +2,50 @@
 
 import { createInterface } from "node:readline";
 import { randomUUID } from "node:crypto";
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import {
+  chmod,
+  lstat,
+  mkdir,
+  readFile,
+  rename,
+  writeFile,
+} from "node:fs/promises";
+import {
+  basename,
+  dirname,
+  extname,
+  isAbsolute,
+  join,
+  resolve,
+} from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.5" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.6" };
 const CANVAS_APP_URL = "https://designer.etm.tech/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
+const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
+const LOCAL_MEDIA_TYPES = new Map([
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".png", "image/png"],
+  [".webp", "image/webp"],
+  [".gif", "image/gif"],
+  [".bmp", "image/bmp"],
+  [".tif", "image/tiff"],
+  [".tiff", "image/tiff"],
+  [".svg", "image/svg+xml"],
+  [".mp4", "video/mp4"],
+  [".mov", "video/quicktime"],
+  [".webm", "video/webm"],
+  [".avi", "video/x-msvideo"],
+  [".mkv", "video/x-matroska"],
+  [".mp3", "audio/mpeg"],
+  [".wav", "audio/wav"],
+  [".ogg", "audio/ogg"],
+  [".flac", "audio/flac"],
+  [".aac", "audio/aac"],
+  [".m4a", "audio/mp4"],
+]);
 const configPath =
   process.env.INFINITE_CANVAS_CONFIG
   || join(homedir(), ".config", "infinite-canvas", "codex.json");
@@ -74,6 +111,10 @@ async function request(path, { method = "GET", body, authenticated = true, apiUr
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+  return parseResponse(response);
+}
+
+async function parseResponse(response) {
   const text = await response.text();
   let parsed = null;
   if (text) {
@@ -91,6 +132,151 @@ async function request(path, { method = "GET", body, authenticated = true, apiUr
     throw new Error(detail);
   }
   return parsed;
+}
+
+async function prepareLocalMedia(spec) {
+  if (!spec || typeof spec !== "object") {
+    throw new Error("Each files item must be an object.");
+  }
+  const inputPath = String(spec.file_path || "").trim();
+  if (!inputPath || !isAbsolute(inputPath)) {
+    throw new Error(`Local media path must be absolute: ${inputPath || "(empty)"}`);
+  }
+  const filePath = resolve(inputPath);
+  const info = await lstat(filePath).catch(() => null);
+  if (!info || !info.isFile() || info.isSymbolicLink()) {
+    throw new Error(`Local media file does not exist or is not a regular file: ${filePath}`);
+  }
+  if (info.size <= 0) {
+    throw new Error(`Local media file is empty: ${filePath}`);
+  }
+  if (info.size > MAX_LOCAL_ASSET_BYTES) {
+    throw new Error(
+      `Local media file exceeds the 512 MiB plugin limit: ${filePath}`,
+    );
+  }
+  const mimeType = LOCAL_MEDIA_TYPES.get(extname(filePath).toLowerCase());
+  if (!mimeType) {
+    throw new Error(
+      `Unsupported local media type for ${filePath}. `
+      + "Use a standard image, video, or audio file.",
+    );
+  }
+  return {
+    ...spec,
+    filePath,
+    filename: basename(filePath),
+    mimeType,
+    mediaType: mimeType.split("/", 1)[0],
+    size: info.size,
+  };
+}
+
+async function uploadLocalMedia(prepared) {
+  const current = await connection();
+  if (!current.token) {
+    throw new Error(
+      `Infinite Canvas is not paired. Open ${CANVAS_APP_URL} in Chrome, choose `
+      + "Infinite Canvas → user menu → 连接 Codex, then pair the plugin.",
+    );
+  }
+  const bytes = await readFile(prepared.filePath);
+  const form = new FormData();
+  form.append(
+    "file",
+    new Blob([bytes], { type: prepared.mimeType }),
+    prepared.filename,
+  );
+  const response = await fetch(
+    `${normalizeApiUrl(current.apiUrl)}/agent/control/assets/upload`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${current.token}` },
+      body: form,
+    },
+  );
+  return parseResponse(response);
+}
+
+function defaultAssetPosition(snapshot, item, index) {
+  if (item.position) return item.position;
+  const nodes = Array.isArray(snapshot?.nodes) ? snapshot.nodes : [];
+  if (item.connect_to_node_id) {
+    const target = nodes.find((node) => node.id === item.connect_to_node_id);
+    if (target?.position) {
+      return {
+        x: Number(target.position.x || 0) - 420,
+        y: Number(target.position.y || 0) + index * 90,
+      };
+    }
+  }
+  if (nodes.length === 0) {
+    return {
+      x: 100 + (index % 3) * 340,
+      y: 100 + Math.floor(index / 3) * 280,
+    };
+  }
+  const maxX = Math.max(
+    ...nodes.map((node) => Number(node.position?.x || 0)),
+  );
+  const minY = Math.min(
+    ...nodes.map((node) => Number(node.position?.y || 0)),
+  );
+  return {
+    x: maxX + 420 + (index % 3) * 340,
+    y: minY + Math.floor(index / 3) * 280,
+  };
+}
+
+function assetNodeData(asset, prepared) {
+  const metadata = asset?.metadata_ && typeof asset.metadata_ === "object"
+    ? asset.metadata_
+    : {};
+  return {
+    label: String(prepared.label || asset.original_name || prepared.filename),
+    nodeLabel: "素材加载",
+    imageUrl: `/api/v1/assets/${encodeURIComponent(asset.id)}/file`,
+    assetId: asset.id,
+    originalName: asset.original_name || prepared.filename,
+    mediaType: prepared.mediaType,
+    ...(metadata.image_width ? { imageWidth: metadata.image_width } : {}),
+    ...(metadata.image_height ? { imageHeight: metadata.image_height } : {}),
+  };
+}
+
+function buildAssetOperations(snapshot, uploaded, focus) {
+  const operations = [];
+  const refs = [];
+  uploaded.forEach(({ asset, prepared }, index) => {
+    const ref = `local_asset_${index + 1}`;
+    refs.push(ref);
+    operations.push({
+      op: "add_node",
+      ref,
+      node_type: "mediaAsset",
+      position: defaultAssetPosition(snapshot, prepared, index),
+      data: assetNodeData(asset, prepared),
+    });
+    if (prepared.connect_to_node_id) {
+      operations.push({
+        op: "connect_nodes",
+        source: ref,
+        target: prepared.connect_to_node_id,
+        target_handle: prepared.target_handle || null,
+      });
+    }
+  });
+  if (focus !== false) {
+    operations.push({
+      op: "focus_nodes",
+      node_ids: refs,
+      padding: 0.24,
+      min_zoom: 0.1,
+      max_zoom: 1.2,
+      duration: 320,
+    });
+  }
+  return { operations, refs };
 }
 
 async function resolveSession(sessionId) {
@@ -168,6 +354,73 @@ const tools = [
       additionalProperties: false,
     },
     annotations: { readOnlyHint: true, destructiveHint: false },
+  },
+  {
+    name: "upload_local_assets_to_canvas",
+    description:
+      "Upload one or more user-authorized local image, video, or audio files as private Infinite "
+      + "Canvas assets, create media asset nodes in one canvas batch, and optionally connect "
+      + "each new node to an existing target node.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        session_id: {
+          type: "string",
+          description: "Optional when exactly one canvas is active.",
+        },
+        files: {
+          type: "array",
+          minItems: 1,
+          maxItems: 20,
+          items: {
+            type: "object",
+            properties: {
+              file_path: {
+                type: "string",
+                description:
+                  "Absolute path to a local image, video, or audio file explicitly authorized "
+                  + "by the user.",
+              },
+              label: {
+                type: "string",
+                description: "Optional canvas label. Defaults to the original file name.",
+              },
+              position: {
+                type: "object",
+                properties: {
+                  x: { type: "number" },
+                  y: { type: "number" },
+                },
+                required: ["x", "y"],
+                additionalProperties: false,
+              },
+              connect_to_node_id: {
+                type: "string",
+                description: "Optional existing node to connect this asset node into.",
+              },
+              target_handle: {
+                type: "string",
+                description: "Optional target handle for the connection.",
+              },
+            },
+            required: ["file_path"],
+            additionalProperties: false,
+          },
+        },
+        focus: {
+          type: "boolean",
+          description: "Focus the newly created asset nodes. Defaults to true.",
+        },
+        idempotency_key: {
+          type: "string",
+          minLength: 8,
+          description: "Optional stable key for the canvas mutation.",
+        },
+      },
+      required: ["files"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false },
   },
   {
     name: "apply_canvas_operations",
@@ -275,6 +528,96 @@ async function callTool(name, args) {
   }
   if (name === "get_canvas_snapshot") {
     return sendCommand(args.session_id, "get_snapshot", {}, randomUUID());
+  }
+  if (name === "upload_local_assets_to_canvas") {
+    const resolvedSession = await resolveSession(args.session_id);
+    const preparedFiles = [];
+    for (const item of args.files) {
+      preparedFiles.push(await prepareLocalMedia(item));
+    }
+
+    const uploaded = [];
+    try {
+      for (const prepared of preparedFiles) {
+        uploaded.push({
+          prepared,
+          asset: await uploadLocalMedia(prepared),
+        });
+      }
+    } catch (error) {
+      const uploadedIds = uploaded.map(({ asset }) => asset.id).filter(Boolean);
+      const suffix = uploadedIds.length > 0
+        ? ` Assets already uploaded before the failure: ${uploadedIds.join(", ")}.`
+        : "";
+      throw new Error(
+        `${error instanceof Error ? error.message : String(error)}${suffix}`,
+      );
+    }
+
+    let snapshot = await sendCommand(
+      resolvedSession,
+      "get_snapshot",
+      {},
+      randomUUID(),
+    );
+    let built = buildAssetOperations(
+      snapshot.snapshot,
+      uploaded,
+      args.focus,
+    );
+    let result;
+    try {
+      result = await sendCommand(
+        resolvedSession,
+        "apply_operations",
+        {
+          expected_revision: snapshot.revision,
+          operations: built.operations,
+        },
+        args.idempotency_key,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/revision|版本冲突/i.test(message)) {
+        throw new Error(
+          `Assets were uploaded but canvas nodes could not be created: ${message}. `
+          + `Uploaded asset IDs: ${uploaded.map(({ asset }) => asset.id).join(", ")}`,
+        );
+      }
+      snapshot = await sendCommand(
+        resolvedSession,
+        "get_snapshot",
+        {},
+        randomUUID(),
+      );
+      built = buildAssetOperations(
+        snapshot.snapshot,
+        uploaded,
+        args.focus,
+      );
+      result = await sendCommand(
+        resolvedSession,
+        "apply_operations",
+        {
+          expected_revision: snapshot.revision,
+          operations: built.operations,
+        },
+        randomUUID(),
+      );
+    }
+
+    return {
+      revision: result.revision,
+      node_count: result.node_count,
+      edge_count: result.edge_count,
+      assets: uploaded.map(({ asset, prepared }, index) => ({
+        asset_id: asset.id,
+        node_id: result.created?.[built.refs[index]],
+        original_name: asset.original_name || prepared.filename,
+        media_type: prepared.mediaType,
+        file_size: asset.file_size ?? prepared.size,
+      })),
+    };
   }
   if (name === "apply_canvas_operations") {
     return sendCommand(

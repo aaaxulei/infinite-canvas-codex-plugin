@@ -2,10 +2,23 @@
 
 ## Contents
 
+- Local asset upload
 - Supported node types
 - Operation shapes
 - Generation defaults
 - Safe workflow pattern
+
+## Local asset upload
+
+Use `upload_local_assets_to_canvas` for user-authorized local image, video, or audio
+files. Do not create empty `mediaAsset` nodes with local paths in their data:
+generation workflows require server-side asset IDs.
+
+The upload tool validates absolute paths and supported media types, uploads each
+file as a private user-owned asset, then creates all requested `mediaAsset` nodes in
+one canvas batch. Each file item may include `position`, `connect_to_node_id`, and
+`target_handle`. Use the returned `asset_id` and `node_id` values for later workflow
+operations.
 
 ## Supported node types
 
