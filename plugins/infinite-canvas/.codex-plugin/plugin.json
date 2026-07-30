@@ -1,6 +1,6 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Open Infinite Canvas in Chrome, upload local media, then inspect, edit, and run the active browser canvas from Codex.",
   "author": {
     "name": "Infinite Canvas Team"

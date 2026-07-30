@@ -3,9 +3,16 @@
 Apply these defaults only when the user did not choose a model. Preserve explicit
 user choices for model, quality, resolution, duration, and aspect ratio.
 
-Use exact model IDs, but do not invent Provider UUIDs. When no valid Provider ID is
-already known, omit `selectedProvider` and let the canvas executor select the active
-Provider that owns the requested model.
+Call `get_canvas_model_catalog` before configuring a generation node. Use exact
+model IDs and copy the owning `provider_id` from the same catalog entry. Persist
+both values as `selectedProvider` and `selectedModel` in one canvas mutation. Do not
+invent, cache, or reuse a Provider UUID from another environment.
+
+If an exact model ID appears under more than one Provider, use the Provider named in
+the routing table or the Provider explicitly chosen by the user. If the requested
+pair is absent from the current catalog, report that it is unavailable for the
+paired account. Do not omit `selectedProvider` and do not select the first visible
+model as a fallback.
 
 ## Routing table
 
@@ -22,7 +29,9 @@ Provider that owns the requested model.
 2. Apply the routing table when no model was specified.
 3. Preserve existing model settings when extending an existing configured node,
    unless the user asks to replace them.
-4. If the chosen model is unavailable or unauthorized, report the failure. Do not
+4. Resolve the chosen model through the current account's model catalog and store
+   its exact Provider/model pair.
+5. If the chosen model is unavailable or unauthorized, report the failure. Do not
    silently route to a different model solely to bypass permissions or safety.
 
 ## Content-violation retry

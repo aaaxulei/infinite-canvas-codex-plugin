@@ -50,6 +50,12 @@ If tools report that the plugin is not paired:
 5. Pass that exact revision as `expected_revision`. On a conflict, read again and
    rebuild the operation batch; do not blindly retry stale operations.
 
+Before adding or reconfiguring any generation node, also call
+`get_canvas_model_catalog`. Select a Provider/model pair from the paired user's
+current authorized catalog and write both `selectedProvider` and `selectedModel`
+from the same catalog entry. Never combine a Provider ID from one entry with a
+model ID from another entry.
+
 ## Upload local media
 
 Use `upload_local_assets_to_canvas` when the user explicitly supplies or authorizes
@@ -83,8 +89,9 @@ constructing a mutation.
 
 For generation or editing requests, follow
 [references/model-routing.md](references/model-routing.md). Prefer an explicit model
-chosen by the user. Otherwise apply the task-specific defaults without inventing
-Provider IDs.
+chosen by the user. Otherwise apply the task-specific defaults, resolve them
+against `get_canvas_model_catalog`, and persist the returned Provider/model pair
+atomically. Never invent or cache Provider IDs.
 
 When adding nodes, focus the new task or its group. Put `focus_nodes` after the add,
 connect, and group operations in the same batch. The browser bridge also focuses

@@ -133,3 +133,74 @@ test("uploads a local image and creates its canvas asset node", async (context) 
   assert.match(operations[0].data.imageUrl, /\/api\/v1\/assets\/asset-1\/file$/);
   assert.equal(operations[1].op, "focus_nodes");
 });
+
+test("returns the paired user's provider and model catalog", async (context) => {
+  let catalogAuthorization = null;
+  const server = createServer((request, response) => {
+    if (request.method === "GET" && request.url === "/api/v1/agent/control/model-catalog") {
+      catalogAuthorization = request.headers.authorization;
+      writeJson(response, 200, {
+        providers: [{
+          provider_id: "provider-fal",
+          provider_name: "fal.ai",
+          provider_type: "fal",
+          category: "image",
+          models: [{
+            model_id: "openai/gpt-image-2",
+            model_label: "GPT Image 2",
+          }],
+        }],
+      });
+      return;
+    }
+    writeJson(response, 404, { detail: "not found" });
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  context.after(() => server.close());
+
+  const address = server.address();
+  const child = spawn(process.execPath, [scriptPath], {
+    env: {
+      ...process.env,
+      INFINITE_CANVAS_API_URL: `http://127.0.0.1:${address.port}/api/v1`,
+      INFINITE_CANVAS_TOKEN: "icx_pat_catalog",
+    },
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  context.after(() => child.kill());
+
+  let stdout = "";
+  const responses = new Map();
+  child.stdout.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+    let newline;
+    while ((newline = stdout.indexOf("\n")) >= 0) {
+      const line = stdout.slice(0, newline);
+      stdout = stdout.slice(newline + 1);
+      if (!line) continue;
+      const message = JSON.parse(line);
+      responses.get(message.id)?.(message);
+    }
+  });
+
+  const call = (id, method, params) => new Promise((resolve) => {
+    responses.set(id, resolve);
+    child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`);
+  });
+
+  await call(1, "initialize", { protocolVersion: "2025-06-18" });
+  const listed = await call(2, "tools/list", {});
+  assert.ok(listed.result.tools.some((tool) => tool.name === "get_canvas_model_catalog"));
+
+  const response = await call(3, "tools/call", {
+    name: "get_canvas_model_catalog",
+    arguments: {},
+  });
+  assert.equal(response.result.isError, undefined);
+  const result = JSON.parse(response.result.content[0].text);
+  assert.equal(result.providers[0].provider_id, "provider-fal");
+  assert.equal(result.providers[0].models[0].model_id, "openai/gpt-image-2");
+  assert.equal(catalogAuthorization, "Bearer icx_pat_catalog");
+});

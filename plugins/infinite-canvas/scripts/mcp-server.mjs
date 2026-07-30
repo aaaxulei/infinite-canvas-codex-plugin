@@ -20,7 +20,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.6" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.7" };
 const CANVAS_APP_URL = "https://designer.etm.tech/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -356,6 +356,19 @@ const tools = [
     annotations: { readOnlyHint: true, destructiveHint: false },
   },
   {
+    name: "get_canvas_model_catalog",
+    description:
+      "List the paired user's active, authorized Infinite Canvas Provider/model pairs. "
+      + "Call before configuring generation nodes and copy both provider_id and model_id "
+      + "from the same catalog entry.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false },
+  },
+  {
     name: "upload_local_assets_to_canvas",
     description:
       "Upload one or more user-authorized local image, video, or audio files as private Infinite "
@@ -528,6 +541,9 @@ async function callTool(name, args) {
   }
   if (name === "get_canvas_snapshot") {
     return sendCommand(args.session_id, "get_snapshot", {}, randomUUID());
+  }
+  if (name === "get_canvas_model_catalog") {
+    return request("/agent/control/model-catalog");
   }
   if (name === "upload_local_assets_to_canvas") {
     const resolvedSession = await resolveSession(args.session_id);
