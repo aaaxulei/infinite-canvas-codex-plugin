@@ -3,6 +3,10 @@
 Apply these defaults only when the user did not choose a model. Preserve explicit
 user choices for model, quality, resolution, duration, and aspect ratio.
 
+This file remains the short default-routing table; use the detailed model guide
+linked directly from the Skill for task comparison, prompting, ratio guidance,
+and the complete endpoint map.
+
 Call `get_canvas_model_catalog` before configuring a generation node. Use exact
 model IDs and copy the owning `provider_id` from the same catalog entry. Persist
 both values as `selectedProvider` and `selectedModel` in one canvas mutation. Do not
@@ -21,7 +25,7 @@ model as a fallback.
 | Routine image editing | Use `imageOutput` with `selectedModel: "openai/gpt-image-2"` and `gptQuality: "medium"`. This model belongs to the `fal.ai` Provider. |
 | Permitted image editing rejected by the first model as a content violation | Re-check the underlying request. If it is allowed and the rejection is a false positive or model mismatch, retry once with `imageOutput` and `selectedModel: "fal-ai/bytedance/seedream/v5/pro"`. Do not retry genuinely disallowed requests. |
 | Image-to-video | Use `img2video` or `videoGeneration` in image-to-video mode with `selectedModel: "xai/grok-imagine-video/image-to-video"` and `aspectRatio: "auto"` unless the user specifies a ratio. This model belongs to the `fal.ai (Img2Video)` Provider. |
-| Reference-to-video | Use `videoGeneration` in `seedance` mode with `selectedModel: "bytedance/seedance-2.0/runninghub-multimodal"`. Prefer `resolution: "480p"` for routine drafts and `resolution: "720p"` when the user requests more detail or a final-quality result. Use `aspectRatio: "auto"` unless specified. This model belongs to the `RunningHub (Seedance)` Provider. |
+| Reference-to-video | Use `videoGeneration` in `seedance` mode with `selectedModel: "bytedance/seedance-2.0/runninghub-multimodal"`. Prefer `resolution: "480p"` for routine drafts and `resolution: "720p"` when the user requests more detail or a final-quality result. Preserve the source composition with the automatic token returned by the catalog (`adaptive` in the current schema) unless the user specifies another supported ratio. This model belongs to the `RunningHub (Seedance)` Provider. |
 
 ## Priority and failures
 
@@ -31,8 +35,22 @@ model as a fallback.
    unless the user asks to replace them.
 4. Resolve the chosen model through the current account's model catalog and store
    its exact Provider/model pair.
-5. If the chosen model is unavailable or unauthorized, report the failure. Do not
+5. Check input count and type, prompt needs, aspect ratio, resolution, duration,
+   audio, quality, speed, and cost before committing to the pair.
+6. Briefly explain a non-obvious model choice.
+7. If the chosen model is unavailable or unauthorized, report the failure. Do not
    silently route to a different model solely to bypass permissions or safety.
+
+## Aspect-ratio priority
+
+1. Follow an explicit user or delivery specification.
+2. Otherwise use the target channel and subject geometry.
+3. For editing, image-to-video, first/last-frame, and transitions, preserve the
+   source composition with `auto`, `adaptive`, or an omitted field, whichever the
+   selected catalog entry supports.
+4. Keep related shots in one series at the same ratio unless mixed aspect ratios
+   are intentional.
+5. Never choose a ratio that the selected catalog entry does not expose.
 
 ## Content-violation retry
 

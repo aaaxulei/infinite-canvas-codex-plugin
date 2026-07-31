@@ -42,11 +42,18 @@ Legacy video and audio entry types are normalized by Infinite Canvas to the unif
   "ref": "prompt",
   "node_type": "text",
   "position": { "x": 100, "y": 200 },
-  "data": { "content": "A cinematic portrait" }
+  "data": {
+    "nodeLabel": "Campaign | prompt | portrait",
+    "content": "A cinematic portrait"
+  }
 }
 ```
 
 `ref` is optional. It is resolved only inside the same operation batch.
+Choose `position` only after checking the proposed node rectangle against the live
+snapshot. Use `data.nodeLabel` for a display name when the node type supports it.
+Do not overwrite `data.label`, because unified video and audio nodes may use that
+field to select their mode.
 
 ### Update a node
 
@@ -54,7 +61,10 @@ Legacy video and audio entry types are normalized by Infinite Canvas to the unif
 {
   "op": "update_node",
   "node_id": "prompt",
-  "data": { "content": "Updated text" }
+  "data": {
+    "nodeLabel": "Campaign | prompt | approved",
+    "content": "Updated text"
+  }
 }
 ```
 
@@ -136,6 +146,7 @@ Use raw viewport coordinates only when the user asks for a specific viewport:
 ```
 
 These are destructive. Prefer targeted operations.
+Do not use `load_snapshot` as a routine workaround for moving existing nodes.
 
 ## Generation defaults
 
@@ -147,8 +158,10 @@ model preserve the source image ratio.
 ## Safe workflow pattern
 
 1. Read the live snapshot and revision.
-2. Preserve existing node data fields not explicitly targeted.
-3. Create a single logical batch using temporary refs.
-4. Focus the active task with `focus_nodes`.
-5. Supply the read revision and a new idempotency key.
-6. Read again to verify complex changes.
+2. Plan non-overlapping final positions from node and group bounding boxes.
+3. Preserve existing node data fields not explicitly targeted.
+4. Create a single logical batch using temporary refs.
+5. Give displayable nodes clear `nodeLabel` values and groups clear names.
+6. Focus the complete active task with `focus_nodes`.
+7. Supply the read revision and a new idempotency key.
+8. Read again to verify complex changes.

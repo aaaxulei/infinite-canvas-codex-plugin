@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, or run an Infinite Canvas workflow, including requests such as "打开画布" or "打开 Infinite Canvas", or to pair Codex with Infinite Canvas.
+description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, arrange, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -56,6 +56,10 @@ current authorized catalog and write both `selectedProvider` and `selectedModel`
 from the same catalog entry. Never combine a Provider ID from one entry with a
 model ID from another entry.
 
+Use the runtime catalog as the capability source of truth. Public model
+documentation may guide selection and prompting but cannot add an unavailable
+model or parameter to the paired account.
+
 ## Upload local media
 
 Use `upload_local_assets_to_canvas` when the user explicitly supplies or authorizes
@@ -87,20 +91,40 @@ Supported operation shapes and node types are in
 [references/canvas-operations.md](references/canvas-operations.md). Read it before
 constructing a mutation.
 
+For every mutation that creates or extends a workflow, read and follow
+[references/canvas-layout-and-finish.md](references/canvas-layout-and-finish.md).
+Plan final positions before adding nodes. Use node bounding boxes, keep the main
+flow left to right, leave the documented minimum gaps, and avoid all existing
+nodes and groups. Do not move, rename, regroup, or delete unrelated content.
+
+Give displayable nodes concise `data.nodeLabel` values in the user's language using
+`task | stage | variant-or-specification`. Preserve `data.label`, which may control
+a unified node's mode, and preserve semantic fields such as an AI Music
+`data.title`. Give logical task groups clear names.
+
 For generation or editing requests, follow
 [references/model-routing.md](references/model-routing.md). Prefer an explicit model
 chosen by the user. Otherwise apply the task-specific defaults, resolve them
 against `get_canvas_model_catalog`, and persist the returned Provider/model pair
 atomically. Never invent or cache Provider IDs.
 
-When adding nodes, focus the new task or its group. Put `focus_nodes` after the add,
-connect, and group operations in the same batch. The browser bridge also focuses
-newly created top-level nodes as a fallback. Do not repeatedly change the viewport
-while polling an execution.
+For model choice, prompt construction, or aspect-ratio decisions, use
+[references/model-selection-and-prompting.md](references/model-selection-and-prompting.md).
+When a model is known, search that file for its exact ID and read the mapped family
+section plus the aspect-ratio section when relevant. When no model is known, start
+with its model-selection section. Explain a non-obvious model choice briefly.
 
-For image-to-video nodes, set `aspectRatio` to `auto` when the user did not request
-a specific ratio and the selected model supports automatic aspect ratio. Do not
-infer `16:9` or `9:16` only from the prompt.
+Choose aspect ratios from delivery channel, subject geometry, source media, series
+consistency, and the selected endpoint's runtime schema. For image editing,
+image-to-video, first/last-frame, and transition tasks, preserve the source ratio
+with `auto`, `adaptive`, or an omitted ratio when supported unless the user or
+delivery target requires another ratio. Never choose `16:9`, `1:1`, or `9:16`
+without a task-specific reason.
+
+When adding nodes, focus the complete new task or its group. Put `focus_nodes`
+after add, connect, update, and group operations in the same batch. The browser
+bridge also focuses newly created top-level nodes as a fallback. Do not repeatedly
+change the viewport while polling an execution.
 
 Treat `delete_node`, `clear_canvas`, and `load_snapshot` as destructive. Describe the
 scope and obtain confirmation unless the user already explicitly requested that
@@ -118,7 +142,23 @@ Run commands automatically focus their target nodes or group before execution.
 Execution uses the application's queue and provider permissions. Do not bypass model
 permissions, create another queue worker, or call providers directly.
 
-## Verify
+## Finish and verify
 
 After a mutation, inspect the returned counts and created-id map. For non-trivial
 changes, call `get_canvas_snapshot` again and verify the intended nodes and edges.
+
+After all requested executions reach a terminal state, follow the completion
+procedure in
+[references/canvas-layout-and-finish.md](references/canvas-layout-and-finish.md):
+read a fresh snapshot, verify the task's logical order, names, spacing, groups, and
+edges, apply only supported non-destructive corrections, then focus the complete
+task and read once more.
+
+The current protocol cannot move existing nodes or call the store's group
+auto-layout. Do not use destructive `load_snapshot` as a routine layout workaround,
+and do not claim that existing nodes were rearranged when they were not.
+
+Canvas mutations return a revision and can be verified with a fresh snapshot, but
+the MCP response has no separate durable/cloud-save acknowledgement. Report that
+the canvas was updated and verified when that is the available evidence; do not
+claim cloud persistence from the revision alone.
