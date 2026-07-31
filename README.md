@@ -11,6 +11,7 @@
 
 - Codex Desktop
 - 能访问 Infinite Canvas feat 环境
+- 读取飞书 Doc/Wiki 时，本机需安装 `lark-cli` 并完成飞书用户授权
 
 插件会自动使用系统 Node.js 或 Codex 自带的 Node.js，通常无需另外安装或配置
 `PATH`。如自动发现失败，可通过 `INFINITE_CANVAS_NODE` 指定 Node.js 可执行文件的
@@ -59,6 +60,14 @@ codex plugin add infinite-canvas@aaaxulei
 ```text
 运行当前分组，并持续检查执行状态直到完成。
 ```
+
+```text
+使用 $infinite-canvas:create-image-templates，根据这个飞书文档制作图像模板：<URL>
+```
+
+模板 Skill 会优先通过 `lark-doc` 和 `lark-cli` 读取飞书正文及参考图。首次使用前
+需要完成 `lark-cli` 配置和用户授权；读取链路不可用时会降级到已登录的 Chrome
+会话，仍无法完整访问则会停止生成并要求补充权限或素材。
 
 ## 仓库结构
 

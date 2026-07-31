@@ -1,6 +1,6 @@
 ---
 name: create-image-templates
-description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark pages, screenshots, or supplied images. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1 Soul 2.0 lifestyle portraits; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
+description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1 Soul 2.0 lifestyle portraits; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
 ---
 
 # Create Image Templates
@@ -17,6 +17,35 @@ or reviewing generated images.
 ## Workflow
 
 ### 1. Read and index the references
+
+For a Feishu/Lark `/docx/` or `/wiki/` URL:
+
+1. Load and follow the available `lark-doc` skill, including its required
+   `lark-shared` authentication rules and fetch/media references. When using the
+   CLI, read its version-matched instructions with `lark-cli skills read lark-doc`
+   and the referenced fetch/media files before choosing flags.
+2. Read the document with
+   `lark-cli docs +fetch --as user --doc "<URL>"`. A `/wiki/` URL is a supported
+   document source; do not stop at the Wiki container.
+3. Cover the complete document because every template and reference must be
+   indexed. For a large document, use outline and section fetches until every
+   relevant section and media block has been covered.
+4. Preserve document order. Associate each `<img>` with its closest caption,
+   instruction, heading, or table cell before analyzing it.
+5. Inspect every reference image. Use an image URL from `<img>` directly when
+   available; otherwise use
+   `lark-cli docs +media-preview --as user --token "<token>"` with a relative
+   output path, then open the saved image for visual inspection. Use
+   `+media-download` when the user explicitly requests a download or when the
+   source is a whiteboard.
+
+If `lark-cli` is unavailable, authentication or permission fails, or document
+media cannot be retrieved, do not continue from partial text while claiming the
+source was fully read. Follow the `lark-shared` authorization flow first. If that
+path remains unavailable, use a logged-in Chrome session to inspect the complete
+document and all reference images. If neither path can provide complete access,
+stop before generation and ask the user to grant access, export the document, or
+attach the missing images.
 
 Read the complete source document and inspect every reference image with its nearby
 description. Build an internal row for each template containing:

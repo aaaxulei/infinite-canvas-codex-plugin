@@ -1,7 +1,7 @@
 interface:
   display_name: "Operate Infinite Canvas"
   short_description: "Open, arrange, and run live canvas workflows"
-  default_prompt: "Use $operate-infinite-canvas to open my canvas, choose suitable models and aspect ratios, then build and focus an organized workflow."
+  default_prompt: "Use $infinite-canvas:operate-infinite-canvas to open my canvas, choose suitable models and aspect ratios, then build and focus an organized workflow."
 dependencies:
   tools:
     - type: "mcp"
