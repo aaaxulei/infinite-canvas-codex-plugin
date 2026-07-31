@@ -1,6 +1,6 @@
 ---
 name: create-image-templates
-description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1, 720p, General-style Soul 2.0 influencer portraits without prompt expansion; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
+description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1, 720p, General-style Soul 2.0 influencer portraits from Chinese positive-only prompts with casual phone-camera realism and no prompt expansion; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
 ---
 
 # Create Image Templates
@@ -82,22 +82,25 @@ and the catalog-backed values on the node before execution.
 Generate a separate model portrait for each template with:
 
 - a high-attractiveness Instagram/TikTok fashion-blogger aesthetic;
-- natural daily-life or street-style photography with real mobile-camera texture;
+- an everyday phone-camera snapshot rather than a polished editorial photograph;
+- natural available light, ordinary surroundings, handheld framing, and believable
+  mobile-camera exposure, sharpness, and perspective;
 - a believable adult non-celebrity presence with confident creator energy;
 - temperament, styling, expression, and body language inferred from the template;
-- no celebrity impersonation, runway-model posing, or overproduced campaign polish;
+- relaxed, spontaneous body language that feels suitable for a personal social post;
 - framing appropriate to the reference-derived styling; prefer a clear full-body or
   three-quarter fashion portrait when the clothing and silhouette matter;
-- a sharp, recognizable face; slight natural occlusion by hair, a hand, a phone,
-  or another plausible foreground element is acceptable when the key facial
-  features remain readable;
+- a recognizable, usable face whose main features are clear enough for downstream
+  identity reference; slight softness or natural occlusion is acceptable;
 - relaxed expression, natural skin texture, and plausible anatomy;
-- a simple lifestyle background that remains secondary;
-- no text, logo, watermark, interface, or graphic layout.
+- a simple, lived-in everyday background;
+- incidental watermarks are acceptable and do not require regeneration.
 
 Apply the documented region, explicit gender, and inferred temperament only to the
 model-generation prompt. Do not carry fixed identity traits into the reusable
-effect prompt.
+effect prompt. Write every Soul model-generation prompt in Chinese and include only
+positive visual descriptions. Do not append negative-prompt clauses, exclusion
+lists, or sentences beginning with prohibitions such as “不要”, “禁止”, or “避免”.
 
 Visually inspect every model portrait. Regenerate only failed portraits. Do not
 convert accepted Soul results or their temporary URLs into durable private canvas

@@ -29,8 +29,8 @@ Infer a short talent brief before writing the Soul prompt:
 
 Choose a believable non-celebrity who could naturally inhabit the reference scene.
 Retain a high-attractiveness Instagram/TikTok fashion-blogger aesthetic and
-confident creator appeal, but avoid celebrity resemblance, runway stiffness,
-luxury-campaign perfection, and an overly manufactured face.
+confident creator appeal. Favor a relaxed personal social-post presence, ordinary
+surroundings, and believable imperfections from casual phone capture.
 
 ## Soul node settings
 
@@ -51,21 +51,19 @@ by uploading or persisting its output.
 ## Model portrait prompt pattern
 
 Adapt region, explicit gender, inferred temperament, clothing, expression, body
-language, and environment to the source document. Keep the overall target stable:
+language, and environment to the source document. Write the Soul prompt entirely
+in Chinese. Use only positive descriptions of what should appear. Do not add a
+negative prompt, an exclusion list, or prohibition wording. Keep the overall
+target stable:
 
 ```text
-A square Instagram/TikTok-style lifestyle or street-fashion photograph of an adult
-[region and explicit gender only when required], high-attractiveness fashion
-blogger presence, with a [reference-derived temperament] and believable
-non-celebrity identity, [scene-compatible styling, expression, body language, and
-framing], confident natural eye contact, realistic skin texture and pores,
-flattering natural daylight, an understated everyday environment with gentle
-depth, candid mobile-photography realism, clean color, plausible anatomy, sharp
-subject detail. Slight natural face occlusion by hair, a hand, a phone, or a
-foreground object is acceptable while the subject remains recognizable. No
-celebrity resemblance, no stiff runway pose, no artificial beauty-filter face, no
-poster design, no typography, no logo, no watermark, no interface, no distortion,
-no extra limbs.
+一张 1:1 的生活化手机随拍照片，成年[地区和明确要求的性别]，真实的
+Instagram/TikTok 高颜值时尚博主气质，[根据参考图推断的气质]，具有可信的素人身份，
+[适合场景的穿搭、表情、身体语言和构图]，状态自然松弛，像朋友在日常生活中用手机
+随手记录，自然环境光，普通而真实的生活场景，手机自动曝光形成自然的明暗变化，
+轻微手持感和手机镜头透视，色彩接近手机直出，保留真实皮肤纹理、细腻毛孔和生活化
+细节，脸部轮廓与主要五官清楚可辨，清晰度足够用于后续人物身份参考，画面亲近、
+随意、可信，像博主发布在个人动态中的日常照片。
 ```
 
 Avoid metadata labels such as “region:”, “model:”, or “requirements:” inside the
@@ -76,7 +74,15 @@ wardrobe, pose, props, and setting to the actual reference rather than copying
 those identity traits into every template:
 
 ```text
-成年女性，欧美高颜值时尚博主气质，金色长发自然微卷并侧分，发丝柔顺有光泽，精致对称五官，立体鼻梁，饱满嘴唇，干净利落的淡妆与自然高光，真实皮肤纹理与细腻毛孔，身材高挑纤细、腰线明显、曲线感强，站在城市林荫大道的人行道上，背景为两侧高大树木形成的绿色树冠拱廊，路边停放多辆汽车，远处可见住宅/公寓街区与街牌，铺装路面与灰色路缘清晰可见，整体是夏日午后自然光，树叶缝隙洒下斑驳光影，画面明亮通透，生活化街拍氛围，Instagram/TikTok博主风格，真实手机摄影质感，中央构图，平视角，全身入镜，人物正面朝向镜头并带自然眼神交流，手持手机与细线耳机，肩背棕色托特包，穿白色修身吊带上衣与高腰白色贴身短裤，极简性感但高级，服装面料有弹性与细节褶皱，时尚感强，色调清爽干净，背景轻微虚化，浅景深，真实抓拍感，高级感街拍，人像清晰锐利，超写实摄影，8k，细节丰富，肤质自然，光影柔和，画面没有水印、字幕、logo、社交媒体UI元素、边框、畸变和多余肢体
+成年女性，欧美高颜值 Instagram/TikTok 时尚博主气质，金色长发自然微卷并侧分，
+干净自然的日常淡妆，真实皮肤纹理和细腻毛孔，身材高挑纤细，穿白色修身吊带上衣
+与高腰白色短裤，肩背棕色托特包，手持手机与细线耳机，站在城市林荫大道的人行道
+上，正面自然看向镜头，全身入镜，姿态松弛，像朋友散步时顺手用手机记录。道路两侧
+的高大树木形成绿色树冠，路边停着汽车，远处是普通住宅和公寓街区，夏日下午的自然
+光从树叶缝隙落下，人物和路面有自然斑驳光影，手机自动曝光带来轻微明暗变化和局部
+高光，平视角度，轻微手机广角透视，背景保留真实街道细节，色彩接近手机直出，带有
+轻微手持感和生活抓拍的自然随机感，脸部轮廓与主要五官清楚可辨，整体像她刚发布在个人
+动态中的日常穿搭照片，亲近、自然、有生活气息。
 ```
 
 ## Reusable effect prompt contract
@@ -151,15 +157,18 @@ version. Report remaining gaps for user judgment.
 
 - Square `1:1`.
 - `720p`, catalog style `General`, and prompt enhancement/expansion off.
+- Soul prompt is entirely in Chinese and contains positive visual descriptions only.
 - Correct region and explicit gender, or Western default when unspecified.
 - Temperament, styling, expression, and setting fit the reference theme.
 - High-attractiveness Instagram/TikTok blogger aesthetic with a believable adult
   non-celebrity presence.
-- No celebrity resemblance, runway stiffness, or overproduced campaign look.
+- Everyday phone-camera realism, ordinary surroundings, and a relaxed personal-post
+  feeling rather than editorial or campaign polish.
 - Framing supports the reference-derived fashion and silhouette.
-- Face is sharp and recognizable; slight natural occlusion is acceptable.
+- Face and main features are recognizable and usable for downstream identity
+  reference; slight softness or natural occlusion is acceptable.
 - Natural skin, hair, shoulders, and hands.
-- No typography, watermark, interface, or poster layout.
+- Incidental watermarks are acceptable and are not a regeneration reason.
 - Result remains on the generation node and is not converted into a durable private
   asset.
 
