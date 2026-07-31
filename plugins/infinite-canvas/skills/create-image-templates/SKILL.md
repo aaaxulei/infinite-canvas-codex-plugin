@@ -81,34 +81,31 @@ and the catalog-backed values on the node before execution.
 
 Generate a separate model portrait for each template with:
 
-- a high-attractiveness Instagram/TikTok fashion-blogger aesthetic;
-- an everyday phone-camera snapshot rather than a polished editorial photograph;
-- natural available light, ordinary surroundings, handheld framing, and believable
-  mobile-camera exposure, sharpness, and perspective;
-- a believable adult non-celebrity presence with confident creator energy;
-- temperament, styling, expression, and body language inferred from the template;
-- relaxed, spontaneous body language that feels suitable for a personal social post;
-- framing appropriate to the reference-derived styling; prefer a clear full-body or
-  three-quarter fashion portrait when the clothing and silhouette matter;
-- a recognizable, usable face whose main features are clear enough for downstream
-  identity reference; slight softness or natural occlusion is acceptable;
-- relaxed expression, natural skin texture, and plausible anatomy;
-- a simple, lived-in everyday background;
-- incidental watermarks are acceptable and do not require regeneration.
+- a model style inferred from the template theme, such as sweet, cool, mature and
+  confident, handsome, playful, elegant, or another clearly fitting temperament;
+- a genuinely high-attractiveness adult with a believable Instagram/TikTok fashion
+  blogger presence;
+- a realistic, everyday phone-camera look with natural skin and a lived-in setting,
+  not an editorial or cinematic campaign image;
+- a front-facing pose with a clear face and no severe occlusion;
+- clothing, expression, and body language that support the inferred model style.
 
 Apply the documented region, explicit gender, and inferred temperament only to the
 model-generation prompt. Do not carry fixed identity traits into the reusable
 effect prompt. Write every Soul model-generation prompt in Chinese and include only
 positive visual descriptions. Do not append negative-prompt clauses, exclusion
-lists, or sentences beginning with prohibitions such as “不要”, “禁止”, or “避免”.
+lists, or sentences beginning with prohibitions. An incidental watermark is
+acceptable and is not a regeneration reason.
 
-Visually inspect every model portrait. Regenerate only failed portraits. Do not
-convert accepted Soul results or their temporary URLs into durable private canvas
-assets. Keep the accepted Soul generation node in the workflow and connect its
-image output directly to downstream image-edit generation. Run downstream proofs
-while the temporary result remains available. If it expires before a required
-downstream run, regenerate the Soul result with the unchanged prompt, seed, and
-settings instead of uploading or persisting it.
+Visually inspect every model portrait. Accept it when the face is clear and has no
+severe occlusion; do not apply additional visual-quality rejection criteria.
+Regenerate only when this standard fails. Do not convert accepted Soul results or
+their temporary URLs into durable private canvas assets. Keep the accepted Soul
+generation node in the workflow and connect its image output directly to downstream
+image-edit generation. Run downstream proofs while the temporary result remains
+available. If it expires before a required downstream run, regenerate the Soul
+result with the unchanged prompt, seed, and settings instead of uploading or
+persisting it.
 
 ### 3. Reverse-engineer the reusable effect prompt
 

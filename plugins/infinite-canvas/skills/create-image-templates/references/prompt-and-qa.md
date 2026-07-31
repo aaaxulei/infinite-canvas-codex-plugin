@@ -14,23 +14,10 @@ or reviewing paid and free outputs.
 
 ## Model temperament inference
 
-Infer a short talent brief before writing the Soul prompt:
-
-- **Role in the image**: observer, host, traveler, fashion subject, romantic lead,
-  quiet protagonist, energetic participant, or another reference-supported role.
-- **Temperament**: relaxed, warm, reserved, playful, confident, contemplative,
-  adventurous, elegant, cool, or another visible quality.
-- **Styling level**: everyday casual, refined lifestyle, occasion wear, editorial,
-  outdoor, traditional, or minimal.
-- **Expression and body language**: candid smile, calm gaze, gentle look-back,
-  poised stillness, spontaneous movement, or another scene-compatible behavior.
-- **Everyday context**: café, street, home, festival, coast, nature, studio-like
-  wall, or another understated setting.
-
-Choose a believable non-celebrity who could naturally inhabit the reference scene.
-Retain a high-attractiveness Instagram/TikTok fashion-blogger aesthetic and
-confident creator appeal. Favor a relaxed personal social-post presence, ordinary
-surroundings, and believable imperfections from casual phone capture.
+Infer the model style that best fits the template theme before writing the Soul
+prompt. Use a direct temperament such as sweet, cool, mature and confident,
+handsome, playful, elegant, relaxed, or another reference-supported style. Match
+the clothing, expression, and body language to that choice.
 
 ## Soul node settings
 
@@ -50,40 +37,19 @@ by uploading or persisting its output.
 
 ## Model portrait prompt pattern
 
-Adapt region, explicit gender, inferred temperament, clothing, expression, body
-language, and environment to the source document. Write the Soul prompt entirely
-in Chinese. Use only positive descriptions of what should appear. Do not add a
-negative prompt, an exclusion list, or prohibition wording. Keep the overall
-target stable:
+Write the Soul prompt entirely in Chinese with positive visual descriptions only.
+Adapt the inferred model style, region, explicit gender, clothing, and simple
+everyday setting:
 
 ```text
-一张 1:1 的生活化手机随拍照片，成年[地区和明确要求的性别]，真实的
-Instagram/TikTok 高颜值时尚博主气质，[根据参考图推断的气质]，具有可信的素人身份，
-[适合场景的穿搭、表情、身体语言和构图]，状态自然松弛，像朋友在日常生活中用手机
-随手记录，自然环境光，普通而真实的生活场景，手机自动曝光形成自然的明暗变化，
-轻微手持感和手机镜头透视，色彩接近手机直出，保留真实皮肤纹理、细腻毛孔和生活化
-细节，脸部轮廓与主要五官清楚可辨，清晰度足够用于后续人物身份参考，画面亲近、
-随意、可信，像博主发布在个人动态中的日常照片。
+成年[地区和明确要求的性别]，[根据模板主题推断的甜美、冷酷、御姐、帅气或其他气质]，
+真实的 Instagram/TikTok 高颜值时尚博主风格，五官精致自然，[与气质匹配的穿搭、
+表情和身体语言]，正面面对镜头，脸部与主要五官清晰可见，自然皮肤质感，日常生活
+场景，自然光，真实手机随拍质感，像发布在个人社交动态中的生活照片。
 ```
 
-Avoid metadata labels such as “region:”, “model:”, or “requirements:” inside the
-generation prompt. They can encourage unwanted layouts or text.
-
-Use the following as a quality-and-detail example, adapting region, gender,
-wardrobe, pose, props, and setting to the actual reference rather than copying
-those identity traits into every template:
-
-```text
-成年女性，欧美高颜值 Instagram/TikTok 时尚博主气质，金色长发自然微卷并侧分，
-干净自然的日常淡妆，真实皮肤纹理和细腻毛孔，身材高挑纤细，穿白色修身吊带上衣
-与高腰白色短裤，肩背棕色托特包，手持手机与细线耳机，站在城市林荫大道的人行道
-上，正面自然看向镜头，全身入镜，姿态松弛，像朋友散步时顺手用手机记录。道路两侧
-的高大树木形成绿色树冠，路边停着汽车，远处是普通住宅和公寓街区，夏日下午的自然
-光从树叶缝隙落下，人物和路面有自然斑驳光影，手机自动曝光带来轻微明暗变化和局部
-高光，平视角度，轻微手机广角透视，背景保留真实街道细节，色彩接近手机直出，带有
-轻微手持感和生活抓拍的自然随机感，脸部轮廓与主要五官清楚可辨，整体像她刚发布在个人
-动态中的日常穿搭照片，亲近、自然、有生活气息。
-```
+Do not add a negative prompt, exclusion list, prohibition wording, or metadata
+labels such as “地区：”, “模型：”, or “要求：”.
 
 ## Reusable effect prompt contract
 
@@ -159,15 +125,12 @@ version. Report remaining gaps for user judgment.
 - `720p`, catalog style `General`, and prompt enhancement/expansion off.
 - Soul prompt is entirely in Chinese and contains positive visual descriptions only.
 - Correct region and explicit gender, or Western default when unspecified.
-- Temperament, styling, expression, and setting fit the reference theme.
-- High-attractiveness Instagram/TikTok blogger aesthetic with a believable adult
-  non-celebrity presence.
-- Everyday phone-camera realism, ordinary surroundings, and a relaxed personal-post
-  feeling rather than editorial or campaign polish.
-- Framing supports the reference-derived fashion and silhouette.
-- Face and main features are recognizable and usable for downstream identity
-  reference; slight softness or natural occlusion is acceptable.
-- Natural skin, hair, shoulders, and hands.
+- Model style is clearly inferred from and suitable for the template theme.
+- Subject is genuinely high-attractiveness with a realistic Instagram/TikTok
+  fashion-blogger presence.
+- Everyday phone-camera realism rather than an editorial or cinematic image.
+- Face is clear and has no severe occlusion. This is the only visual usability
+  criterion for accepting or regenerating the Soul portrait.
 - Incidental watermarks are acceptable and are not a regeneration reason.
 - Result remains on the generation node and is not converted into a durable private
   asset.

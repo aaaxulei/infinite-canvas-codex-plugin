@@ -20,7 +20,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.12" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.13" };
 const CANVAS_APP_URL = "https://designer.etm.tech/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
