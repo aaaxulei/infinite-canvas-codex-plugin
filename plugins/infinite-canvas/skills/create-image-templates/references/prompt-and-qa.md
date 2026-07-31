@@ -16,8 +16,10 @@ or reviewing paid and free outputs.
 
 Infer the model style that best fits the template theme before writing the Soul
 prompt. Use a direct temperament such as sweet, cool, mature and confident,
-handsome, playful, elegant, relaxed, or another reference-supported style. Match
-the clothing, expression, and body language to that choice.
+handsome, playful, elegant, relaxed, or another reference-supported style. Infer
+only a broad fashion direction, then invent a distinct simple everyday outfit.
+Reserve the reference image's exact wardrobe and visual setup for the later effect
+prompt.
 
 ## Soul node settings
 
@@ -38,18 +40,21 @@ by uploading or persisting its output.
 ## Model portrait prompt pattern
 
 Write the Soul prompt entirely in Chinese with positive visual descriptions only.
-Adapt the inferred model style, region, explicit gender, clothing, and simple
-everyday setting:
+Adapt the inferred model style, broad fashion direction, region, and explicit
+gender. Create an independent Pinterest-like person source photo:
 
 ```text
 成年[地区和明确要求的性别]，[根据模板主题推断的甜美、冷酷、御姐、帅气或其他气质]，
-真实的 Instagram/TikTok 高颜值时尚博主风格，五官精致自然，[与气质匹配的穿搭、
-表情和身体语言]，正面面对镜头，脸部与主要五官清晰可见，自然皮肤质感，日常生活
-场景，自然光，真实手机随拍质感，像发布在个人社交动态中的生活照片。
+真实的 Instagram/TikTok 高颜值时尚博主风格，五官精致自然，穿着符合[甜美休闲、
+冷酷街头、优雅极简或其他宽泛风格]的简洁日常时尚穿搭，正面面对镜头，脸部与主要
+五官清晰可见，自然皮肤质感，简单日常背景，自然光，真实手机随拍质感，像在
+Pinterest 上找到的独立博主人物素材照片。
 ```
 
 Do not add a negative prompt, exclusion list, prohibition wording, or metadata
-labels such as “地区：”, “模型：”, or “要求：”.
+labels such as “地区：”, “模型：”, or “要求：”. Do not copy the reference
+image's specific garment type, color combination, accessories, pose, props,
+composition, or location into the Soul prompt.
 
 ## Reusable effect prompt contract
 
@@ -128,6 +133,8 @@ version. Report remaining gaps for user judgment.
 - Model style is clearly inferred from and suitable for the template theme.
 - Subject is genuinely high-attractiveness with a realistic Instagram/TikTok
   fashion-blogger presence.
+- Soul is an independent Pinterest-like person source photo; reference-specific
+  wardrobe, pose, props, composition, and scene remain in the effect stage.
 - Everyday phone-camera realism rather than an editorial or cinematic image.
 - Face is clear and has no severe occlusion. This is the only visual usability
   criterion for accepting or regenerating the Soul portrait.

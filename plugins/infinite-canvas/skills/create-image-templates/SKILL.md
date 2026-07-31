@@ -1,6 +1,6 @@
 ---
 name: create-image-templates
-description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1, 720p, General-style Soul 2.0 influencer portraits from Chinese positive-only prompts with casual phone-camera realism and no prompt expansion; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
+description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament and broad fashion style from each reference theme; generate distinct Pinterest-like 1:1, 720p, General-style Soul 2.0 influencer source portraits from Chinese positive-only prompts without copying the reference outfit, pose, props, composition, or scene; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
 ---
 
 # Create Image Templates
@@ -83,12 +83,16 @@ Generate a separate model portrait for each template with:
 
 - a model style inferred from the template theme, such as sweet, cool, mature and
   confident, handsome, playful, elegant, or another clearly fitting temperament;
+- only a broad fashion direction inferred from the theme, such as sweet casual,
+  cool streetwear, elegant minimal, or relaxed everyday;
 - a genuinely high-attractiveness adult with a believable Instagram/TikTok fashion
   blogger presence;
+- a standalone Pinterest-like person source photo with a newly invented, simple
+  everyday outfit;
 - a realistic, everyday phone-camera look with natural skin and a lived-in setting,
   not an editorial or cinematic campaign image;
 - a front-facing pose with a clear face and no severe occlusion;
-- clothing, expression, and body language that support the inferred model style.
+- expression and body language that support the inferred model style.
 
 Apply the documented region, explicit gender, and inferred temperament only to the
 model-generation prompt. Do not carry fixed identity traits into the reusable
@@ -96,6 +100,11 @@ effect prompt. Write every Soul model-generation prompt in Chinese and include o
 positive visual descriptions. Do not append negative-prompt clauses, exclusion
 lists, or sentences beginning with prohibitions. An incidental watermark is
 acceptable and is not a regeneration reason.
+
+Treat the template as a casting brief for Soul, not as a wardrobe or composition
+reference. Do not put its exact garments, colors, accessories, pose, props,
+composition, or scene into the Soul prompt. Keep those details exclusively for the
+reusable effect prompt in the next stage.
 
 Visually inspect every model portrait. Accept it when the face is clear and has no
 severe occlusion; do not apply additional visual-quality rejection criteria.
