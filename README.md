@@ -70,5 +70,7 @@ plugins/infinite-canvas/
 ├── scripts/
 │   ├── mcp-server.mjs
 │   └── start-mcp.sh
-└── skills/operate-infinite-canvas/
+└── skills/
+    ├── operate-infinite-canvas/
+    └── create-image-templates/
 ```

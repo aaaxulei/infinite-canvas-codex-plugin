@@ -1,6 +1,6 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Open Infinite Canvas in Chrome, upload local media, choose suitable models, and build organized live workflows from Codex.",
   "author": {
     "name": "Infinite Canvas Team"
