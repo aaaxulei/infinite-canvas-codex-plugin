@@ -1,7 +1,7 @@
 interface:
   display_name: "制作图像模板"
-  short_description: "推断适配模特、对照参考图并构建可验收模板工作流"
-  default_prompt: "使用 $infinite-canvas:create-image-templates 读取参考文档，推断适配参考图气质的素人模特，生成付费样片并对照参考图，必要时自动制作 V2，验收后再生成免费版。"
+  short_description: "生成博主风 Soul 模特并构建可验收模板工作流"
+  default_prompt: "使用 $infinite-canvas:create-image-templates 读取参考文档，以 Soul 生成 1:1、720p、General 风格且关闭提示词扩展的高颜值博主风模特，不持久化 Soul 结果；生成付费样片并对照参考图，必要时自动制作 V2，验收后再生成免费版。"
 dependencies:
   tools:
     - type: "mcp"

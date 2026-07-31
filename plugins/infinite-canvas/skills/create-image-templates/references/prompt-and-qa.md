@@ -28,8 +28,25 @@ Infer a short talent brief before writing the Soul prompt:
   wall, or another understated setting.
 
 Choose a believable non-celebrity who could naturally inhabit the reference scene.
-Retain attractive creator/influencer appeal, but avoid celebrity resemblance,
-runway stiffness, luxury-campaign perfection, and an overly manufactured face.
+Retain a high-attractiveness Instagram/TikTok fashion-blogger aesthetic and
+confident creator appeal, but avoid celebrity resemblance, runway stiffness,
+luxury-campaign perfection, and an overly manufactured face.
+
+## Soul node settings
+
+Resolve `soul-v2-standard` and all parameter values from the live catalog. Set and
+persist these values explicitly before every Soul run:
+
+- aspect ratio: `1:1`;
+- quality/resolution: `720p`;
+- style: the catalog option named `General`;
+- prompt enhancement/expansion: off (`soulEnhancePrompt: false`);
+- batch size: `1`, unless the user explicitly requests multiple candidates.
+
+Do not convert an accepted Soul result into a durable private user asset. Connect
+the Soul generation node's result directly to downstream editing nodes. Temporary
+result expiry is handled by rerunning the unchanged prompt, seed, and settings, not
+by uploading or persisting its output.
 
 ## Model portrait prompt pattern
 
@@ -37,20 +54,30 @@ Adapt region, explicit gender, inferred temperament, clothing, expression, body
 language, and environment to the source document. Keep the overall target stable:
 
 ```text
-A square Instagram-style lifestyle portrait photograph of an adult [region and
-explicit gender only when required], with a [reference-derived temperament] and
-believable non-celebrity presence, [scene-compatible styling, expression, and body
-language], half-body or near-half-body framing, full face clearly visible and
-sharply focused, both eyes visible, hair away from the eyes and face, hands away
-from the face, approachable creator appeal, realistic natural skin texture,
-flattering directional daylight, an understated everyday environment with gentle
-depth, candid but composed photography, natural anatomy. No celebrity resemblance,
-no runway pose, no luxury campaign polish, no poster design, no typography, no
-logo, no watermark, no interface, no beauty-filter artifacts, no face obstruction.
+A square Instagram/TikTok-style lifestyle or street-fashion photograph of an adult
+[region and explicit gender only when required], high-attractiveness fashion
+blogger presence, with a [reference-derived temperament] and believable
+non-celebrity identity, [scene-compatible styling, expression, body language, and
+framing], confident natural eye contact, realistic skin texture and pores,
+flattering natural daylight, an understated everyday environment with gentle
+depth, candid mobile-photography realism, clean color, plausible anatomy, sharp
+subject detail. Slight natural face occlusion by hair, a hand, a phone, or a
+foreground object is acceptable while the subject remains recognizable. No
+celebrity resemblance, no stiff runway pose, no artificial beauty-filter face, no
+poster design, no typography, no logo, no watermark, no interface, no distortion,
+no extra limbs.
 ```
 
 Avoid metadata labels such as “region:”, “model:”, or “requirements:” inside the
 generation prompt. They can encourage unwanted layouts or text.
+
+Use the following as a quality-and-detail example, adapting region, gender,
+wardrobe, pose, props, and setting to the actual reference rather than copying
+those identity traits into every template:
+
+```text
+成年女性，欧美高颜值时尚博主气质，金色长发自然微卷并侧分，发丝柔顺有光泽，精致对称五官，立体鼻梁，饱满嘴唇，干净利落的淡妆与自然高光，真实皮肤纹理与细腻毛孔，身材高挑纤细、腰线明显、曲线感强，站在城市林荫大道的人行道上，背景为两侧高大树木形成的绿色树冠拱廊，路边停放多辆汽车，远处可见住宅/公寓街区与街牌，铺装路面与灰色路缘清晰可见，整体是夏日午后自然光，树叶缝隙洒下斑驳光影，画面明亮通透，生活化街拍氛围，Instagram/TikTok博主风格，真实手机摄影质感，中央构图，平视角，全身入镜，人物正面朝向镜头并带自然眼神交流，手持手机与细线耳机，肩背棕色托特包，穿白色修身吊带上衣与高腰白色贴身短裤，极简性感但高级，服装面料有弹性与细节褶皱，时尚感强，色调清爽干净，背景轻微虚化，浅景深，真实抓拍感，高级感街拍，人像清晰锐利，超写实摄影，8k，细节丰富，肤质自然，光影柔和，画面没有水印、字幕、logo、社交媒体UI元素、边框、畸变和多余肢体
+```
 
 ## Reusable effect prompt contract
 
@@ -62,13 +89,14 @@ camera perspective, depth, texture, and intended photographic treatment].
 
 PRESERVE: Keep the exact identity, facial structure, recognizable features, natural
 skin texture, and plausible anatomy of the person from the reference image. Keep
-the face clear and unobstructed.
+the face readable; slight natural occlusion is acceptable.
 
 REFERENCE ROLE: The input image defines identity only.
 
 PROHIBIT: No screenshot UI, status bar, buttons, usernames, profile icons, arrows,
 upload thumbnail, credits, captions, random text, logo, watermark, extra people,
-duplicate body parts, malformed hands, face obstruction, or low resolution.
+duplicate body parts, malformed hands, severe face obstruction that prevents
+recognition, or low resolution.
 ```
 
 Do not include a fixed gender, age, skin color, face shape, hairstyle, or body type
@@ -97,7 +125,7 @@ chrome and judge the intended image across these dimensions:
 4. spatial layout, foreground, background, and depth;
 5. light direction, contrast, color structure, and atmosphere;
 6. lens feeling, texture, photographic finish, and overall mood;
-7. prohibited UI, random text, anatomy errors, and face obstruction.
+7. prohibited UI, random text, anatomy errors, and severe face obstruction.
 
 Treat creative differences as acceptable when the reference’s essential visual
 logic remains recognizable. Mark **meets or exceeds** when the signature elements
@@ -111,7 +139,7 @@ gaps. Create a revised prompt that:
 - explicitly corrects those gaps;
 - preserves successful composition and identity details;
 - avoids rewriting unrelated clauses;
-- keeps the same Soul asset, paid model, and `2:3` output;
+- keeps the same accepted Soul result, paid model, and `2:3` output;
 - creates a separate V2 prompt and result without overwriting V1.
 
 After V2, compare again. Stop automatic paid iteration after this one corrective
@@ -122,14 +150,18 @@ version. Report remaining gaps for user judgment.
 ### Model portrait
 
 - Square `1:1`.
+- `720p`, catalog style `General`, and prompt enhancement/expansion off.
 - Correct region and explicit gender, or Western default when unspecified.
 - Temperament, styling, expression, and setting fit the reference theme.
-- Believable non-celebrity presence with Instagram-style daily-life appeal.
+- High-attractiveness Instagram/TikTok blogger aesthetic with a believable adult
+  non-celebrity presence.
 - No celebrity resemblance, runway stiffness, or overproduced campaign look.
-- Half-body or near-half-body composition.
-- Face and both eyes sharp, complete, and unobstructed.
+- Framing supports the reference-derived fashion and silhouette.
+- Face is sharp and recognizable; slight natural occlusion is acceptable.
 - Natural skin, hair, shoulders, and hands.
 - No typography, watermark, interface, or poster layout.
+- Result remains on the generation node and is not converted into a durable private
+  asset.
 
 ### Paid proof
 
@@ -147,6 +179,6 @@ version. Report remaining gaps for user judgment.
 
 - Generated only after explicit approval.
 - `2:3`.
-- Uses the same Soul asset and the approved V1 or V2 prompt.
+- Uses the same accepted Soul generation result and the approved V1 or V2 prompt.
 - Stored separately from the paid result.
 - Visually inspected and arranged for side-by-side comparison.

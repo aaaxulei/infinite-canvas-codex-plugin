@@ -1,6 +1,6 @@
 ---
 name: create-image-templates
-description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1 Soul 2.0 lifestyle portraits; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
+description: Build reusable, approval-gated image-template workflows in Infinite Canvas from reference documents, Feishu/Lark Doc or Wiki pages, screenshots, or supplied images. Use the available lark-doc skill and lark-cli to read Feishu/Lark text and inspect its media before creating templates. Use when the user asks to infer a suitable non-celebrity model temperament from each reference theme, scene, and style; generate 1:1, 720p, General-style Soul 2.0 influencer portraits without prompt expansion; reverse-engineer identity-neutral prompts; create 2:3 paid proofs with fal.ai GPT Image 2.0 or Nano Banana Pro; compare proofs with the references and automatically make one prompt-corrected V2 only when needed; pause for user review; and only after explicit approval create a comparable Free boogui2i version.
 ---
 
 # Create Image Templates
@@ -68,17 +68,30 @@ logos, and watermarks.
 ### 2. Generate the model portrait
 
 Resolve `soul-v2-standard` through the current canvas model catalog and use its
-owning Provider. Generate a separate model portrait for each template with:
+owning Provider. Configure every Soul node explicitly from the live catalog:
 
-- `1:1` aspect ratio;
-- Instagram-style, natural daily-life photography;
-- a believable, attractive non-celebrity presence with approachable creator energy;
+- aspect ratio `1:1`;
+- resolution/quality `720p`;
+- the style option named `General` from the model's current `style_options`;
+- prompt enhancement/expansion disabled (`soulEnhancePrompt: false`);
+- one output unless the user explicitly requests a batch.
+
+Do not rely on node defaults for these settings. Persist the Provider/model pair
+and the catalog-backed values on the node before execution.
+
+Generate a separate model portrait for each template with:
+
+- a high-attractiveness Instagram/TikTok fashion-blogger aesthetic;
+- natural daily-life or street-style photography with real mobile-camera texture;
+- a believable adult non-celebrity presence with confident creator energy;
 - temperament, styling, expression, and body language inferred from the template;
 - no celebrity impersonation, runway-model posing, or overproduced campaign polish;
-- half-body or near-half-body framing;
-- a complete, sharp, unobstructed face and both eyes visible;
+- framing appropriate to the reference-derived styling; prefer a clear full-body or
+  three-quarter fashion portrait when the clothing and silhouette matter;
+- a sharp, recognizable face; slight natural occlusion by hair, a hand, a phone,
+  or another plausible foreground element is acceptable when the key facial
+  features remain readable;
 - relaxed expression, natural skin texture, and plausible anatomy;
-- hair and hands kept away from the face;
 - a simple lifestyle background that remains secondary;
 - no text, logo, watermark, interface, or graphic layout.
 
@@ -86,9 +99,13 @@ Apply the documented region, explicit gender, and inferred temperament only to t
 model-generation prompt. Do not carry fixed identity traits into the reusable
 effect prompt.
 
-Visually inspect every model portrait. Regenerate only failed portraits. Convert
-each accepted result into a durable private canvas asset before downstream editing,
-so reference-required models receive an asset ID rather than only a transient URL.
+Visually inspect every model portrait. Regenerate only failed portraits. Do not
+convert accepted Soul results or their temporary URLs into durable private canvas
+assets. Keep the accepted Soul generation node in the workflow and connect its
+image output directly to downstream image-edit generation. Run downstream proofs
+while the temporary result remains available. If it expires before a required
+downstream run, regenerate the Soul result with the unchanged prompt, seed, and
+settings instead of uploading or persisting it.
 
 ### 3. Reverse-engineer the reusable effect prompt
 
@@ -122,9 +139,9 @@ Resolve the exact Provider/model pair from the current catalog:
 3. Do not run both paid models unless the user requests a comparison or the first
    choice fails or clearly misses the template.
 
-Use the accepted Soul asset and the reusable effect prompt. Preserve the subject’s
-identity while implementing the reference composition. Name nodes and groups with
-the template number, stage, model, and `2:3`.
+Use the accepted Soul generation result directly with the reusable effect prompt.
+Preserve the subject’s identity while implementing the reference composition. Name
+nodes and groups with the template number, stage, model, and `2:3`.
 
 Inspect paid proofs for prompt adherence, identity, face clarity, anatomy, unwanted
 text/UI, composition, and visual finish. Compare every proof directly with its
@@ -138,7 +155,7 @@ Classify the result:
 - **Needs correction**: one or more important visual relationships are missing or
   materially wrong. Record the largest one to three gaps, preserve what already
   works, revise only the relevant prompt clauses, and generate one V2 with the same
-  model and Soul asset.
+  model and accepted Soul result.
 
 Keep V1 when creating V2. Give the revised prompt and result distinct `V2` labels.
 Compare V2 with the reference again. Do not enter an unbounded paid retry loop; if
@@ -170,8 +187,10 @@ On a later explicit approval:
 2. Resolve Provider `Free` with model ID `ggnnp` (display name `boogui2i`) from the
    current catalog.
 3. Create a separate `2:3` free-version node for each approved template.
-4. Use the same durable Soul asset and the exact approved V1 or V2 prompt for a fair
-   model comparison.
+4. Use the same accepted Soul generation result and the exact approved V1 or V2
+   prompt for a fair model comparison. If that temporary result has expired,
+   regenerate it from the unchanged Soul prompt, seed, and settings; do not persist
+   it as a private asset.
 5. Do not overwrite the paid proof.
 6. Run the free nodes, inspect them, and place paid and free results so they can be
    compared easily.
@@ -184,10 +203,10 @@ for direct replication rather than a fair model comparison.
 Use this logical order for every template:
 
 ```text
-Model prompt → Soul 2.0 model asset → reusable effect prompt
-                                     → paid 2:3 proof
-                                     → approval gate
-                                     → boogui2i 2:3 comparison
+Model prompt → Soul 2.0 temporary result → reusable effect prompt
+                                          → paid 2:3 proof
+                                          → approval gate
+                                          → boogui2i 2:3 comparison
 ```
 
 Keep each template in a clearly named group. Preserve unrelated canvas content.
@@ -199,7 +218,8 @@ For each completed stage, report:
 
 - templates processed and any region defaults used;
 - the inferred model temperament and why it fits each reference;
-- exact Provider/model pairs and aspect ratios;
+- exact Provider/model pairs, aspect ratios, Soul quality/style, and prompt
+  enhancement state;
 - successful, failed, or regenerated items;
 - the reference-comparison verdict, major gaps, and any V2 prompt corrections;
 - whether the workflow is waiting for approval or has produced free comparisons;
