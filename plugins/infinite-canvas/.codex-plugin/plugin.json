@@ -1,6 +1,6 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.14",
+  "version": "0.1.17",
   "description": "Open Infinite Canvas in Chrome, upload local media, choose suitable models, and build organized live workflows from Codex.",
   "author": {
     "name": "Infinite Canvas Team"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Infinite Canvas",
     "shortDescription": "Open, organize, and run live canvas workflows",
-    "longDescription": "Open https://designer.etm.tech/ in the user's Chrome, upload user-authorized local media as private asset nodes, choose suitable models, prompts, and aspect ratios, then build, arrange, focus, and run the authenticated Infinite Canvas workflow without bypassing canvasStore.",
+    "longDescription": "Open the user's configured Infinite Canvas deployment in Chrome, upload user-authorized local media as private asset nodes, choose suitable models, prompts, and aspect ratios, then build, arrange, focus, and run the authenticated workflow without bypassing canvasStore.",
     "developerName": "Infinite Canvas Team",
     "category": "Productivity",
     "capabilities": ["Read", "Write", "Interactive"],

@@ -10,19 +10,24 @@ directly, or manipulate React Flow through generic browser automation.
 
 ## Open
 
-The canonical Infinite Canvas URL is **https://designer.etm.tech/**.
+Use the deployment selected by the user or pairing information. The standard
+local default is **http://localhost:8899/**; production, staging, and regional
+deployments must keep their own application/API URLs and credentials.
 
 When the user asks to open, show, visit, or go to Infinite Canvas or the canvas:
 
-1. Load and follow the available Chrome browser control skill
+1. Choose the exact URL named by the user. If none is named, use the configured
+   deployment URL; only fall back to the local development default when no
+   managed environment is selected.
+2. Load and follow the available Chrome browser control skill
    (`chrome:control-chrome` when plugin-prefixed), then navigate the user's Chrome
    to the exact canonical URL above. Treat this as explicit Chrome intent even when
    the user did not name a browser.
-2. Reuse and focus an existing Chrome tab at that URL when practical; otherwise
+3. Reuse and focus an existing Chrome tab at that URL when practical; otherwise
    open a new Chrome tab.
-3. Do not substitute the in-app browser, web search, a shell `open` command, or the
+4. Do not substitute the in-app browser, web search, a shell `open` command, or the
    canvas MCP tools for this navigation.
-4. If the request is only to open the canvas, finish after successful navigation.
+5. If the request is only to open the canvas, finish after successful navigation.
    Opening the site does not require pairing.
 
 If the same request also asks to inspect or change the canvas, open it in Chrome
@@ -36,8 +41,10 @@ If tools report that the plugin is not paired:
    the flow above.
 2. Ask the user to choose **Infinite Canvas → user menu → 连接 Codex**.
 3. Ask for the displayed one-time code.
-4. Call `pair_infinite_canvas`. Use the default API URL for the standard local
-   development environment; pass a deployment URL only when the user provides it.
+4. Call `pair_infinite_canvas`. Use the default API URL only for standard local
+   development. For staging, production, or a regional environment, pass both
+   that deployment's `api_url` and `app_url`; never reuse another environment's
+   pairing token.
 5. Never repeat or expose the returned token. The MCP server stores it itself.
 
 ## Read before writing
@@ -154,9 +161,10 @@ read a fresh snapshot, verify the task's logical order, names, spacing, groups, 
 edges, apply only supported non-destructive corrections, then focus the complete
 task and read once more.
 
-The current protocol cannot move existing nodes or call the store's group
-auto-layout. Do not use destructive `load_snapshot` as a routine layout workaround,
-and do not claim that existing nodes were rearranged when they were not.
+Use `move_node` for targeted repositioning and `layout_group` for the store's
+dependency-aware horizontal or compact-grid group layout. Verify the final
+bounding boxes after either operation; do not use destructive `load_snapshot` as
+a layout workaround.
 
 Canvas mutations return a revision and can be verified with a fresh snapshot, but
 the MCP response has no separate durable/cloud-save acknowledgement. Report that

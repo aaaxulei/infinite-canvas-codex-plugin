@@ -123,18 +123,30 @@ wardrobe, props, setting, light, color, perspective, depth of field, texture, an
 photographic treatment.
 
 Keep the effect prompt identity-neutral. Do not fix gender, age, skin color, facial
-features, hairstyle, or body shape. Refer to the subject as “the person from the
-reference image” or an equivalent generic phrase.
+features, hairstyle, or body shape. Refer to the subject as “the person in the
+uploaded image” or an equivalent generic phrase.
 
-Use the four-part contract from the prompt reference:
+Write the reusable effect prompt as formal, production-ready English prose. It must
+be executable independently with the current input image and must fully state:
 
-- `CHANGE`
-- `PRESERVE`
-- `REFERENCE ROLE`
-- `PROHIBIT`
+- how the uploaded image supplies the person whose identity must remain
+  recognizable;
+- the required composition, pose, wardrobe, props, environment, lighting, color,
+  camera perspective, depth, texture, and photographic treatment;
+- any concise output restrictions needed to exclude screenshot chrome, accidental
+  text, extra people, or critical anatomical defects.
+
+Do not put prompt-engineering field names or section labels such as `CHANGE`,
+`PRESERVE`, `REFERENCE ROLE`, `PROHIBIT`, `NEGATIVE PROMPT`, or similar metadata in
+the prompt body. Do not mention workflow state, iteration history, evaluation, or
+another generated result. This includes `V1`, `V2`, “the previous version,” “the
+earlier result,” “what already works,” “successful details,” or instructions to
+continue, retain, extend, or improve a prior generation. Every generation is
+independent; write every intended visual detail explicitly in the current prompt.
 
 Put every editable prompt in a text node and connect it to its generation node via
-the text input handle.
+the text input handle. The text node must contain only the ready-to-run prompt, not
+analysis notes, a change log, comparison findings, or a QA verdict.
 
 ### 4. Create the paid proof
 
@@ -162,15 +174,19 @@ Classify the result:
   styling, light, color, and mood are present with no disqualifying defect. Keep V1
   and do not generate another paid version.
 - **Needs correction**: one or more important visual relationships are missing or
-  materially wrong. Record the largest one to three gaps, preserve what already
-  works, revise only the relevant prompt clauses, and generate one V2 with the same
-  model and accepted Soul result.
+  materially wrong. Record the largest one to three gaps outside the prompt, update
+  the relevant visual instructions, and generate one V2 with the same model and
+  accepted Soul result.
 
 Keep V1 when creating V2. Give the revised prompt and result distinct `V2` labels.
-Compare V2 with the reference again. Do not enter an unbounded paid retry loop; if
-V2 still misses the target, report the remaining gaps and leave the decision to the
-user. Retry technical failures separately; do not silently replace a deliberate
-model choice.
+The `V2` marker belongs only in node names and workflow reporting. Rewrite the V2
+prompt as a complete standalone instruction that explicitly restates every desired
+visual property, including the properties that were already satisfactory in V1.
+Never describe it as a delta from V1 and never mention V1 or its success inside the
+prompt. Compare V2 with the reference again. Do not enter an unbounded paid retry
+loop; if V2 still misses the target, report the remaining gaps and leave the
+decision to the user. Retry technical failures separately; do not silently replace
+a deliberate model choice.
 
 ### 5. Stop for user approval
 

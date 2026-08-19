@@ -204,3 +204,49 @@ test("returns the paired user's provider and model catalog", async (context) => 
   assert.equal(result.providers[0].models[0].model_id, "openai/gpt-image-2");
   assert.equal(catalogAuthorization, "Bearer icx_pat_catalog");
 });
+
+test("uses the selected deployment app URL and exposes the plugin version", async (context) => {
+  const tempRoot = await mkdtemp(join(tmpdir(), "infinite-canvas-mcp-config-"));
+  context.after(() => rm(tempRoot, { recursive: true, force: true }));
+  const child = spawn(process.execPath, [scriptPath], {
+    env: {
+      ...process.env,
+      INFINITE_CANVAS_APP_URL: "https://staging.example.test/",
+      INFINITE_CANVAS_API_URL: "https://staging.example.test/api/v1",
+      INFINITE_CANVAS_TOKEN: "",
+      INFINITE_CANVAS_CONFIG: join(tempRoot, "missing-config.json"),
+    },
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  context.after(() => child.kill());
+
+  let stdout = "";
+  const responses = new Map();
+  child.stdout.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+    let newline;
+    while ((newline = stdout.indexOf("\n")) >= 0) {
+      const line = stdout.slice(0, newline);
+      stdout = stdout.slice(newline + 1);
+      if (!line) continue;
+      const message = JSON.parse(line);
+      responses.get(message.id)?.(message);
+    }
+  });
+
+  const call = (id, method, params) => new Promise((resolve) => {
+    responses.set(id, resolve);
+    child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`);
+  });
+
+  const initialized = await call(1, "initialize", { protocolVersion: "2025-06-18" });
+  assert.equal(initialized.result.serverInfo.version, "0.1.17");
+  const response = await call(2, "tools/call", {
+    name: "list_canvas_sessions",
+    arguments: {},
+  });
+  assert.equal(response.result.isError, true);
+  const result = JSON.parse(response.result.content[0].text);
+  assert.match(result.error, /https:\/\/staging\.example\.test\//);
+});

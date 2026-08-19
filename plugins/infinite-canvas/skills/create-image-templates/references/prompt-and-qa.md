@@ -7,7 +7,7 @@ or reviewing paid and free outputs.
 
 - Model temperament inference
 - Model portrait prompt pattern
-- Reusable effect prompt contract
+- Reusable effect prompt standard
 - Paid-model choice
 - Reference comparison and V2 decision
 - Visual QA checklist
@@ -56,29 +56,56 @@ labels such as “地区：”, “模型：”, or “要求：”. Do not copy
 image's specific garment type, color combination, accessories, pose, props,
 composition, or location into the Soul prompt.
 
-## Reusable effect prompt contract
+## Reusable effect prompt standard
 
-Write concrete visual facts rather than abstract praise.
+Write concrete visual facts rather than abstract praise. Use formal English prose
+that reads as one production-ready instruction, not a form, schema, checklist, or
+conversation with an earlier generation.
 
-```text
-CHANGE: [scene, composition, pose, wardrobe, props, environment, lighting, color,
-camera perspective, depth, texture, and intended photographic treatment].
+A complete effect prompt should naturally cover these ideas:
 
-PRESERVE: Keep the exact identity, facial structure, recognizable features, natural
-skin texture, and plausible anatomy of the person from the reference image. Keep
-the face readable; slight natural occlusion is acceptable.
+1. Begin with the operation and identity source, for example: “Generate a
+   photorealistic portrait based on the person in the uploaded image, preserving
+   the person’s recognizable identity and natural facial structure.”
+2. Describe the desired composition, crop, pose, gaze, wardrobe, props, setting,
+   spatial relationships, lighting, color, camera angle, depth of field, texture,
+   and finish in explicit visual language.
+3. End with concise quality and exclusion sentences when needed, for example:
+   “Keep the face clearly readable and the anatomy plausible. The final image must
+   not contain screenshot interfaces, random text, logos, watermarks, extra people,
+   or duplicated body parts.”
 
-REFERENCE ROLE: The input image defines identity only.
-
-PROHIBIT: No screenshot UI, status bar, buttons, usernames, profile icons, arrows,
-upload thumbnail, credits, captions, random text, logo, watermark, extra people,
-duplicate body parts, malformed hands, severe face obstruction that prevents
-recognition, or low resolution.
-```
+Do not include field names or headings such as `CHANGE`, `PRESERVE`, `REFERENCE
+ROLE`, `PROHIBIT`, `NEGATIVE PROMPT`, or close variants. Do not include bullets,
+analysis notes, QA findings, or a change log in a generation prompt.
 
 Do not include a fixed gender, age, skin color, face shape, hairstyle, or body type
 in the effect prompt. A requested garment or pose is allowed when it defines the
 template’s visual effect rather than the subject’s identity.
+
+## Independence and revision rules
+
+Treat every model call as independent. A prompt must make sense when executed from
+scratch with only its current input image or images. It must not rely on chat
+history, a prior prompt, or an earlier generated image.
+
+Never write process-dependent phrases such as:
+
+- `V1` or `V2`;
+- “the previous version,” “the earlier result,” or “the first generation”;
+- “preserve what already works,” “keep the successful black-and-white look,” or
+  “continue the atmosphere established earlier”;
+- any request to extend, refine, improve, or otherwise inherit unnamed qualities
+  from a previous output.
+
+Version markers are allowed only in canvas node names and workflow reports. When a
+proof needs correction, keep the comparison findings outside the prompt and create
+a new, complete English prompt. Restate every desired visual property explicitly,
+including properties that did not need correction. For example, instead of writing
+“Preserve V1’s successful high-contrast black-and-white texture and dark
+background,” write the actual target description: “Use high-contrast black-and-
+white photography, a deep charcoal studio background, realistic skin texture, and
+precise focus on both eyes and the lips.”
 
 ## Paid-model choice
 
@@ -114,10 +141,12 @@ poorly framed, visually weak, or contradicted. Identify at most three high-impac
 gaps. Create a revised prompt that:
 
 - explicitly corrects those gaps;
-- preserves successful composition and identity details;
-- avoids rewriting unrelated clauses;
+- restates the full desired composition and identity treatment in standalone form;
+- retains satisfactory visual requirements by writing them out explicitly rather
+  than referring to the prior result;
 - keeps the same accepted Soul result, paid model, and `2:3` output;
-- creates a separate V2 prompt and result without overwriting V1.
+- creates a separate V2 prompt and result without overwriting V1;
+- uses `V1` and `V2` only in node labels and reporting, never in prompt text.
 
 After V2, compare again. Stop automatic paid iteration after this one corrective
 version. Report remaining gaps for user judgment.
@@ -150,6 +179,8 @@ version. Report remaining gaps for user judgment.
 - Clothing, props, scene, light, and color relationships follow the prompt.
 - Face remains clear; hands and anatomy are plausible.
 - Screenshot UI and random text are absent.
+- Prompt text is formal, self-contained English prose with no prompt-schema labels,
+  version references, prior-result references, analysis notes, or change log.
 - The result has a documented reference-comparison verdict.
 - A separate V2 exists only when the V1 verdict was `needs correction`.
 - The final candidate is suitable for user review.

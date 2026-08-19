@@ -20,8 +20,8 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.14" };
-const CANVAS_APP_URL = "https://designer.etm.tech/";
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.17" };
+const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
 const LOCAL_MEDIA_TYPES = new Map([
@@ -66,19 +66,40 @@ function normalizeApiUrl(value) {
   return String(value || DEFAULT_API_URL).trim().replace(/\/+$/, "");
 }
 
+function normalizeAppUrl(value) {
+  return `${String(value || DEFAULT_CANVAS_APP_URL).trim().replace(/\/+$/, "")}/`;
+}
+
+function appUrlFromApiUrl(apiUrl) {
+  const normalized = normalizeApiUrl(apiUrl);
+  if (normalized === DEFAULT_API_URL) return "http://localhost:8899/";
+  try {
+    return normalizeAppUrl(new URL(normalized).origin);
+  } catch {
+    return DEFAULT_CANVAS_APP_URL;
+  }
+}
+
 async function connection() {
   const saved = await loadFileConfig();
+  const configuredApiUrl =
+    process.env.INFINITE_CANVAS_API_URL || saved.api_url || "";
+  const apiUrl = normalizeApiUrl(configuredApiUrl || DEFAULT_API_URL);
   return {
-    apiUrl: normalizeApiUrl(
-      process.env.INFINITE_CANVAS_API_URL || saved.api_url || DEFAULT_API_URL,
+    apiUrl,
+    appUrl: normalizeAppUrl(
+      process.env.INFINITE_CANVAS_APP_URL
+        || saved.app_url
+        || (configuredApiUrl ? appUrlFromApiUrl(apiUrl) : DEFAULT_CANVAS_APP_URL),
     ),
     token: process.env.INFINITE_CANVAS_TOKEN || saved.token || "",
   };
 }
 
-async function saveConnection(apiUrl, token) {
+async function saveConnection(apiUrl, appUrl, token) {
   const payload = {
     api_url: normalizeApiUrl(apiUrl),
+    app_url: normalizeAppUrl(appUrl),
     token,
     paired_at: new Date().toISOString(),
   };
@@ -98,7 +119,7 @@ async function request(path, { method = "GET", body, authenticated = true, apiUr
   const base = normalizeApiUrl(apiUrl || current.apiUrl);
   if (authenticated && !current.token) {
     throw new Error(
-      `Infinite Canvas is not paired. Open ${CANVAS_APP_URL} in Chrome, choose `
+      `Infinite Canvas is not paired. Open ${current.appUrl} in Chrome, choose `
       + "Infinite Canvas → user menu → 连接 Codex, then call pair_infinite_canvas "
       + "with the displayed code.",
     );
@@ -176,7 +197,7 @@ async function uploadLocalMedia(prepared) {
   const current = await connection();
   if (!current.token) {
     throw new Error(
-      `Infinite Canvas is not paired. Open ${CANVAS_APP_URL} in Chrome, choose `
+      `Infinite Canvas is not paired. Open ${current.appUrl} in Chrome, choose `
       + "Infinite Canvas → user menu → 连接 Codex, then pair the plugin.",
     );
   }
@@ -284,8 +305,9 @@ async function resolveSession(sessionId) {
   const payload = await request("/agent/control/sessions");
   const sessions = Array.isArray(payload?.sessions) ? payload.sessions : [];
   if (sessions.length === 0) {
+    const current = await connection();
     throw new Error(
-      `No active Infinite Canvas browser canvas. Open ${CANVAS_APP_URL} in Chrome, `
+      `No active Infinite Canvas browser canvas. Open ${current.appUrl} in Chrome, `
       + "sign in, and keep the canvas tab visible.",
     );
   }
@@ -327,6 +349,11 @@ const tools = [
           type: "string",
           description:
             `Infinite Canvas API base URL including /api/v1. Default: ${DEFAULT_API_URL}`,
+        },
+        app_url: {
+          type: "string",
+          description:
+            "Browser application URL for this deployment. Required when it cannot be derived from api_url.",
         },
       },
       required: ["pairing_code"],
@@ -457,8 +484,9 @@ const tools = [
           maxItems: 100,
           items: { type: "object" },
           description:
-            "Operations documented by the bundled skill: add_node, update_node, connect_nodes, "
-            + "delete_node, group_nodes, ungroup_nodes, focus_nodes, set_viewport, "
+            "Operations documented by the bundled skill: add_node, update_node, move_node, connect_nodes, "
+            + "delete_node, group_nodes, ungroup_nodes, rename_group, set_group_color, layout_group, "
+            + "focus_nodes, set_viewport, "
             + "load_snapshot, clear_canvas.",
         },
       },
@@ -521,16 +549,22 @@ const tools = [
 async function callTool(name, args) {
   if (name === "pair_infinite_canvas") {
     const apiUrl = normalizeApiUrl(args.api_url || DEFAULT_API_URL);
+    const appUrl = normalizeAppUrl(
+      args.app_url
+        || process.env.INFINITE_CANVAS_APP_URL
+        || appUrlFromApiUrl(apiUrl),
+    );
     const result = await request("/agent/pairing/exchange", {
       method: "POST",
       body: { code: args.pairing_code },
       authenticated: false,
       apiUrl,
     });
-    await saveConnection(apiUrl, result.token);
+    await saveConnection(apiUrl, appUrl, result.token);
     return {
       paired: true,
       api_url: apiUrl,
+      app_url: appUrl,
       token_name: result.token_info?.name,
       expires_at: result.token_info?.expires_at,
       config_path: configPath,

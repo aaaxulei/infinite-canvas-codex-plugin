@@ -6,6 +6,7 @@
       "cwd": ".",
       "env_vars": [
         "INFINITE_CANVAS_API_URL",
+        "INFINITE_CANVAS_APP_URL",
         "INFINITE_CANVAS_TOKEN",
         "INFINITE_CANVAS_CONFIG",
         "INFINITE_CANVAS_NODE"

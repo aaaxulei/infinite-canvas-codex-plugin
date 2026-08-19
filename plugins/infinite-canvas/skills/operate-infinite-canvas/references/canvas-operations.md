@@ -25,12 +25,37 @@ operations.
 Use these values for `add_node.node_type`:
 
 `imageOutput`, `text`, `videoGeneration`, `img2video`, `videoOutput`, `seedance`,
-`firstLastFrame`, `videoEffect`, `audioGeneration`, `textToSpeech`, `aiMusic`,
+`firstLastFrame`, `videoEffect`, `vibeMV`, `productVideo`, `audioGeneration`,
+`textToSpeech`, `aiMusic`,
 `avatar`, `mediaAsset`, `llm`, `translate`, `promptList`, `imageList`, `outpaint`,
 `erase`, `videoProcess`, `videoResult`.
 
 Legacy video and audio entry types are normalized by Infinite Canvas to the unified
 `videoGeneration` and `audioGeneration` React Flow node types.
+
+`run_canvas_nodes` executes image generation, every configured video-generation
+mode, text-to-speech, AI Music, avatar, LLM, translation, text, outpaint, erase,
+and video processing. `mediaAsset`, `promptList`, `imageList`, `videoResult`, and
+derived `imageOutput` nodes with `hideParamsPanel: true` are data/result nodes and
+do not run independently.
+
+For `erase`, set `data.maskAssetId` to a user-owned black-and-white mask asset
+before execution. Upload the mask with `upload_local_assets_to_canvas`, then use
+its returned `asset_id`; never infer or fabricate an erase region.
+
+For `videoProcess`, set `data.operation` to one of:
+
+| operation | Additional data |
+|---|---|
+| `removeAudio` | None; this is the default |
+| `trim` | `startTimeSec`, `endTimeSec` |
+| `extractAudio` | None |
+| `mergeAudio` | `audioAssetId` for a user-owned audio asset |
+| `captureFrame` | `captureTimeSec` |
+
+The primary media can be supplied by a normal incoming connection or by
+`data.assetId`. Processing writes `resultAssetId`, `resultMediaType`, and
+`resultOriginalName` back to the node, so downstream nodes consume the result.
 
 ## Operation shapes
 
@@ -70,6 +95,20 @@ field to select their mode.
 
 `node_id` may be a real node ID or an earlier `ref`.
 
+### Move a node
+
+```json
+{
+  "op": "move_node",
+  "node_id": "prompt",
+  "position": { "x": 360, "y": 200 }
+}
+```
+
+Positions use the same coordinate space as the node's snapshot entry. A top-level
+node uses canvas coordinates; a grouped child uses coordinates relative to its
+parent group. Plan the final rectangle and avoid overlaps before moving it.
+
 ### Connect nodes
 
 ```json
@@ -105,6 +144,26 @@ workflow. Infinite Canvas validates connection compatibility.
 ```json
 { "op": "ungroup_nodes", "group_id": "group" }
 ```
+
+Rename, recolor, or arrange an existing group with:
+
+```json
+{ "op": "rename_group", "group_id": "group", "name": "Final workflow" }
+```
+
+```json
+{ "op": "set_group_color", "group_id": "group", "color": "blue" }
+```
+
+Valid colors are `gray`, `red`, `orange`, `yellow`, `green`, `cyan`, `blue`, and
+`purple`.
+
+```json
+{ "op": "layout_group", "group_id": "group", "mode": "horizontal" }
+```
+
+Layout mode is `horizontal` for dependency-aware left-to-right arrangement or
+`grid` for a compact grid.
 
 ### Set viewport
 
@@ -146,7 +205,7 @@ Use raw viewport coordinates only when the user asks for a specific viewport:
 ```
 
 These are destructive. Prefer targeted operations.
-Do not use `load_snapshot` as a routine workaround for moving existing nodes.
+Use `move_node` or `layout_group` instead of `load_snapshot` for arrangement.
 
 ## Generation defaults
 
