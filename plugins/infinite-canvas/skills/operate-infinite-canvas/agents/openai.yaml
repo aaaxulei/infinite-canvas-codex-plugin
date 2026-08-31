@@ -1,6 +1,6 @@
 interface:
   display_name: "Operate Infinite Canvas"
-  short_description: "Open, arrange, and run live canvas workflows"
+  short_description: "Edit, save, export, and run live canvas workflows"
   default_prompt: "Use $infinite-canvas:operate-infinite-canvas to open my canvas, choose suitable models and aspect ratios, then build and focus an organized workflow."
 dependencies:
   tools:

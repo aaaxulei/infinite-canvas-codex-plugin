@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, arrange, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
+description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -133,16 +133,37 @@ after add, connect, update, and group operations in the same batch. The browser
 bridge also focuses newly created top-level nodes as a fallback. Do not repeatedly
 change the viewport while polling an execution.
 
-Treat `delete_node`, `clear_canvas`, and `load_snapshot` as destructive. Describe the
-scope and obtain confirmation unless the user already explicitly requested that
-exact destructive change.
+Use targeted edge operations for wiring corrections: `delete_edge` for a known
+edge ID, `disconnect_nodes` for endpoint/handle matching, and
+`replace_edge`/`retarget_edge` to move a connection without deleting its target
+node. Use `delete_edges_batch` for a reviewed set of erroneous edges. `undo` and
+`redo` must each be the only operation in their batch.
+
+Use `duplicate_nodes` for reusable subgraphs, `layout_nodes` for arbitrary nodes in
+one hierarchy level, and `align_nodes`/`distribute_nodes`/`move_nodes_batch` for
+precise cleanup. Group membership can be changed with `add_nodes_to_group` and
+`remove_nodes_from_group` without dissolving the group. Use `resize_node` or
+`resize_group` only when the requested size is intentional.
+
+Treat `delete_node`, `delete_edge`, `delete_edges_batch`, `disconnect_nodes`,
+`clear_canvas`, and `load_snapshot` as destructive. Describe the scope and obtain
+confirmation unless the user already explicitly requested that exact destructive
+change. Retargeting one known incorrect edge does not require a second confirmation
+when it is the requested correction.
 
 ## Execute
 
 Call `run_canvas_nodes` or `run_canvas_group`. These return immediately with an
-`execution_id`. Poll `get_canvas_execution` until `succeeded` or `failed`; report
-failed node messages without hiding them. Do not start the same run again while its
-execution is still `running`.
+`execution_id`. Poll `get_canvas_execution` until `succeeded`, `failed`, or
+`cancelled`; report failed node messages without hiding them. Do not start the same
+run again while its execution is still `running`.
+
+Use `cancel_canvas_execution` when the user asks to stop an Agent-started execution.
+It aborts the browser executor and best-effort cancels discovered queued/running
+generation records through the normal authenticated queue API. Use
+`retry_failed_canvas_nodes` with the failed execution ID to run only its recorded
+failed nodes. Use `retry_canvas_batch_item` for one failed image/video batch item;
+the target node must be mounted and retain its retry context.
 
 Run commands automatically focus their target nodes or group before execution.
 
@@ -161,12 +182,18 @@ read a fresh snapshot, verify the task's logical order, names, spacing, groups, 
 edges, apply only supported non-destructive corrections, then focus the complete
 task and read once more.
 
-Use `move_node` for targeted repositioning and `layout_group` for the store's
-dependency-aware horizontal or compact-grid group layout. Verify the final
-bounding boxes after either operation; do not use destructive `load_snapshot` as
-a layout workaround.
+Use `move_node` or `move_nodes_batch` for targeted repositioning, `layout_group` for
+a group's dependency-aware layout, and `layout_nodes` for an ungrouped or same-level
+selection. Verify final bounding boxes after layout; do not use destructive
+`load_snapshot` as a layout workaround.
 
-Canvas mutations return a revision and can be verified with a fresh snapshot, but
-the MCP response has no separate durable/cloud-save acknowledgement. Report that
-the canvas was updated and verified when that is the available evidence; do not
-claim cloud persistence from the revision alone.
+When durable persistence is requested, call `save_canvas` with the latest revision
+and use its `saved`, `workflow_id`, and `saved_at` response as the acknowledgement.
+Call `get_canvas_save_status` to distinguish a persisted clean canvas from a dirty
+or unsaved one. A mutation revision alone is still not proof of cloud persistence.
+
+Use `export_canvas_workflow` for a selected subgraph or group. Pass either
+`node_ids` or `group_id`; optionally provide an authorized absolute `output_path`.
+Existing files are not replaced unless `overwrite: true`. Use `import_snapshot_at`
+to add an exported workflow at a chosen canvas position without replacing the
+current canvas.

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { createServer } from "node:http";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -205,6 +205,117 @@ test("returns the paired user's provider and model catalog", async (context) => 
   assert.equal(catalogAuthorization, "Bearer icx_pat_catalog");
 });
 
+test("forwards execution control, save, status, and workflow export commands", async (context) => {
+  const commandBodies = [];
+  const server = createServer(async (request, response) => {
+    if (request.method === "GET" && request.url === "/api/v1/agent/control/sessions") {
+      writeJson(response, 200, { sessions: [{ id: "session-1" }] });
+      return;
+    }
+    if (
+      request.method === "POST"
+      && request.url === "/api/v1/agent/control/sessions/session-1/commands"
+    ) {
+      const body = await readJson(request);
+      commandBodies.push(body);
+      const results = {
+        cancel_execution: { status: "cancelled", cancelled: true },
+        retry_failed_nodes: { execution_id: "exec-retry", status: "running" },
+        retry_batch_item: { execution_id: "exec-item", status: "running" },
+        save_canvas: { saved: true, workflow_id: "workflow-1", revision: 7 },
+        get_save_status: { persisted: true, dirty: false },
+        export_workflow: {
+          filename: "group.workflow.json",
+          node_count: 1,
+          edge_count: 0,
+          workflow: {
+            format: "infinitcanvas.workflow",
+            version: 1,
+            workflowName: "Group",
+            snapshot: {
+              nodes: [{ id: "node-1", position: { x: 0, y: 0 }, data: {} }],
+              edges: [],
+              counter: 1,
+            },
+          },
+        },
+      };
+      writeJson(response, 200, results[body.command_type]);
+      return;
+    }
+    writeJson(response, 404, { detail: "not found" });
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  context.after(() => server.close());
+
+  const tempRoot = await mkdtemp(join(tmpdir(), "infinite-canvas-mcp-commands-"));
+  context.after(() => rm(tempRoot, { recursive: true, force: true }));
+  const outputPath = join(tempRoot, "group.workflow.json");
+  const address = server.address();
+  const child = spawn(process.execPath, [scriptPath], {
+    env: {
+      ...process.env,
+      INFINITE_CANVAS_API_URL: `http://127.0.0.1:${address.port}/api/v1`,
+      INFINITE_CANVAS_TOKEN: "icx_pat_commands",
+    },
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  context.after(() => child.kill());
+
+  let stdout = "";
+  const responses = new Map();
+  child.stdout.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+    let newline;
+    while ((newline = stdout.indexOf("\n")) >= 0) {
+      const line = stdout.slice(0, newline);
+      stdout = stdout.slice(newline + 1);
+      if (!line) continue;
+      const message = JSON.parse(line);
+      responses.get(message.id)?.(message);
+    }
+  });
+  const call = (id, name, args) => new Promise((resolve) => {
+    responses.set(id, resolve);
+    child.stdin.write(`${JSON.stringify({
+      jsonrpc: "2.0",
+      id,
+      method: "tools/call",
+      params: { name, arguments: args },
+    })}\n`);
+  });
+
+  const calls = [
+    [1, "cancel_canvas_execution", { execution_id: "exec-1" }],
+    [2, "retry_failed_canvas_nodes", { execution_id: "exec-1" }],
+    [3, "retry_canvas_batch_item", { node_id: "node-1", result_index: 2 }],
+    [4, "save_canvas", { expected_revision: 7, name: "Saved" }],
+    [5, "get_canvas_save_status", {}],
+    [6, "export_canvas_workflow", { group_id: "group-1", output_path: outputPath }],
+  ];
+  for (const [id, name, args] of calls) {
+    const response = await call(id, name, args);
+    assert.equal(response.result.isError, undefined, `${name} failed`);
+  }
+
+  assert.deepEqual(commandBodies.map((body) => body.command_type), [
+    "cancel_execution",
+    "retry_failed_nodes",
+    "retry_batch_item",
+    "save_canvas",
+    "get_save_status",
+    "export_workflow",
+  ]);
+  assert.deepEqual(commandBodies[2].arguments, { node_id: "node-1", result_index: 2 });
+  assert.deepEqual(commandBodies[5].arguments, { group_id: "group-1" });
+  const exported = JSON.parse(await readFile(outputPath, "utf8"));
+  assert.equal(exported.workflowName, "Group");
+  assert.equal(exported.snapshot.nodes[0].id, "node-1");
+  assert.equal((await stat(outputPath)).mode & 0o777, 0o600);
+});
+
 test("uses the selected deployment app URL and exposes the plugin version", async (context) => {
   const tempRoot = await mkdtemp(join(tmpdir(), "infinite-canvas-mcp-config-"));
   context.after(() => rm(tempRoot, { recursive: true, force: true }));
@@ -241,8 +352,20 @@ test("uses the selected deployment app URL and exposes the plugin version", asyn
   });
 
   const initialized = await call(1, "initialize", { protocolVersion: "2025-06-18" });
-  assert.equal(initialized.result.serverInfo.version, "0.1.17");
-  const response = await call(2, "tools/call", {
+  assert.equal(initialized.result.serverInfo.version, "0.1.18");
+  const listed = await call(2, "tools/list", {});
+  const toolNames = listed.result.tools.map((tool) => tool.name);
+  for (const expected of [
+    "cancel_canvas_execution",
+    "retry_failed_canvas_nodes",
+    "retry_canvas_batch_item",
+    "save_canvas",
+    "get_canvas_save_status",
+    "export_canvas_workflow",
+  ]) {
+    assert.ok(toolNames.includes(expected), `missing MCP tool: ${expected}`);
+  }
+  const response = await call(3, "tools/call", {
     name: "list_canvas_sessions",
     arguments: {},
   });

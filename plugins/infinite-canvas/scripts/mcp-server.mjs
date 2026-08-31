@@ -20,7 +20,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.17" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.18" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -332,6 +332,31 @@ async function sendCommand(sessionId, commandType, args, idempotencyKey, timeout
   });
 }
 
+async function writeWorkflowExport(outputPath, workflow, overwrite = false) {
+  if (!isAbsolute(outputPath)) {
+    throw new Error("output_path must be an absolute local path.");
+  }
+  const parent = await lstat(dirname(outputPath)).catch(() => null);
+  if (!parent?.isDirectory()) {
+    throw new Error(`Export directory does not exist: ${dirname(outputPath)}`);
+  }
+  const existing = await lstat(outputPath).catch(() => null);
+  if (existing?.isDirectory()) throw new Error(`output_path is a directory: ${outputPath}`);
+  if (existing?.isSymbolicLink()) {
+    throw new Error(`Refusing to write workflow export through a symbolic link: ${outputPath}`);
+  }
+  if (existing && !overwrite) {
+    throw new Error(`Export file already exists; pass overwrite=true to replace it: ${outputPath}`);
+  }
+  await writeFile(outputPath, `${JSON.stringify(workflow, null, 2)}\n`, {
+    encoding: "utf8",
+    mode: 0o600,
+    flag: overwrite ? "w" : "wx",
+  });
+  await chmod(outputPath, 0o600);
+  return outputPath;
+}
+
 const tools = [
   {
     name: "pair_infinite_canvas",
@@ -485,8 +510,12 @@ const tools = [
           items: { type: "object" },
           description:
             "Operations documented by the bundled skill: add_node, update_node, move_node, connect_nodes, "
-            + "delete_node, group_nodes, ungroup_nodes, rename_group, set_group_color, layout_group, "
-            + "focus_nodes, set_viewport, "
+            + "delete_node, delete_edge, disconnect_nodes, replace_edge/retarget_edge, delete_edges_batch, "
+            + "undo/redo, duplicate_nodes, group_nodes, ungroup_nodes, add_nodes_to_group, "
+            + "remove_nodes_from_group, rename_group, set_group_color, layout_group, layout_nodes, "
+            + "align_nodes, distribute_nodes, move_nodes_batch, resize_node/resize_group, "
+            + "reorder_incoming_edge, split_batch_result, split_music_track, update_edge, "
+            + "select_nodes, clear_selection, focus_nodes, set_viewport, import_snapshot_at, "
             + "load_snapshot, clear_canvas.",
         },
       },
@@ -543,6 +572,104 @@ const tools = [
       additionalProperties: false,
     },
     annotations: { readOnlyHint: true, destructiveHint: false },
+  },
+  {
+    name: "cancel_canvas_execution",
+    description:
+      "Cancel a running node/group execution started through this live canvas session. "
+      + "Queued generation records already discovered by the executor are cancelled for their owner.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        session_id: { type: "string" },
+        execution_id: { type: "string" },
+        idempotency_key: { type: "string", minLength: 8 },
+      },
+      required: ["execution_id"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true },
+  },
+  {
+    name: "retry_failed_canvas_nodes",
+    description:
+      "Start a new execution containing only the failed node IDs recorded by a previous failed canvas execution.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        session_id: { type: "string" },
+        execution_id: { type: "string" },
+        idempotency_key: { type: "string", minLength: 8 },
+      },
+      required: ["execution_id"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false },
+  },
+  {
+    name: "retry_canvas_batch_item",
+    description:
+      "Retry one failed batch result using the live node component's existing single-item retry path. "
+      + "Returns a new execution_id to poll.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        session_id: { type: "string" },
+        node_id: { type: "string" },
+        result_index: { type: "integer", minimum: 0 },
+        idempotency_key: { type: "string", minLength: 8 },
+      },
+      required: ["node_id", "result_index"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false },
+  },
+  {
+    name: "save_canvas",
+    description:
+      "Explicitly persist the current live canvas to its workflow record (or create one) and return durable save confirmation.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        session_id: { type: "string" },
+        expected_revision: { type: "integer", minimum: 0 },
+        name: { type: "string", description: "Optional workflow name for create or rename-on-save." },
+        idempotency_key: { type: "string", minLength: 8 },
+      },
+      required: ["expected_revision"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false },
+  },
+  {
+    name: "get_canvas_save_status",
+    description:
+      "Read whether the live canvas has a persisted workflow, whether it is dirty, and its last confirmed save time.",
+    inputSchema: {
+      type: "object",
+      properties: { session_id: { type: "string" } },
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false },
+  },
+  {
+    name: "export_canvas_workflow",
+    description:
+      "Export a selected node subset or group as an importable Infinite Canvas workflow. "
+      + "Optionally write the JSON to an authorized absolute local output_path.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        session_id: { type: "string" },
+        node_ids: { type: "array", minItems: 1, items: { type: "string" } },
+        group_id: { type: "string" },
+        name: { type: "string" },
+        output_path: { type: "string", description: "Optional absolute local .json path." },
+        overwrite: { type: "boolean", description: "Replace an existing output file. Defaults to false." },
+      },
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true },
   },
 ];
 
@@ -703,6 +830,66 @@ async function callTool(name, args) {
       { execution_id: args.execution_id },
       randomUUID(),
     );
+  }
+  if (name === "cancel_canvas_execution") {
+    return sendCommand(
+      args.session_id,
+      "cancel_execution",
+      { execution_id: args.execution_id },
+      args.idempotency_key,
+    );
+  }
+  if (name === "retry_failed_canvas_nodes") {
+    return sendCommand(
+      args.session_id,
+      "retry_failed_nodes",
+      { execution_id: args.execution_id },
+      args.idempotency_key,
+    );
+  }
+  if (name === "retry_canvas_batch_item") {
+    return sendCommand(
+      args.session_id,
+      "retry_batch_item",
+      { node_id: args.node_id, result_index: args.result_index },
+      args.idempotency_key,
+    );
+  }
+  if (name === "save_canvas") {
+    return sendCommand(
+      args.session_id,
+      "save_canvas",
+      { expected_revision: args.expected_revision, name: args.name },
+      args.idempotency_key,
+      60,
+    );
+  }
+  if (name === "get_canvas_save_status") {
+    return sendCommand(
+      args.session_id,
+      "get_save_status",
+      {},
+      randomUUID(),
+    );
+  }
+  if (name === "export_canvas_workflow") {
+    if (args.group_id && Array.isArray(args.node_ids) && args.node_ids.length > 0) {
+      throw new Error("Pass either group_id or node_ids, not both");
+    }
+    const result = await sendCommand(
+      args.session_id,
+      "export_workflow",
+      { node_ids: args.node_ids, group_id: args.group_id, name: args.name },
+      randomUUID(),
+    );
+    if (!args.output_path) return result;
+    const outputPath = await writeWorkflowExport(
+      args.output_path,
+      result.workflow,
+      args.overwrite === true,
+    );
+    const { workflow: _workflow, ...metadata } = result;
+    return { ...metadata, output_path: outputPath };
   }
   throw new Error(`Unknown tool: ${name}`);
 }
