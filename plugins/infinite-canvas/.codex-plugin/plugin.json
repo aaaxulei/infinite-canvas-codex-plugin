@@ -1,15 +1,15 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.18",
-  "description": "Open Infinite Canvas in Chrome and inspect, edit, save, export, and run live canvas workflows from Codex.",
+  "version": "0.1.19",
+  "description": "Operate live canvas workflows and prepare, tag, and upload offline material-center templates from Codex.",
   "author": {
     "name": "Infinite Canvas Team"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Infinite Canvas",
-    "shortDescription": "Edit, save, export, and run live canvas workflows",
-    "longDescription": "Open the user's configured Infinite Canvas deployment in Chrome, upload user-authorized local media as private asset nodes, inspect and precisely edit nodes, edges, groups, layout, and selections, then save, export, run, cancel, or retry the authenticated workflow without bypassing canvasStore.",
+    "shortDescription": "Canvas workflows and material-center uploads",
+    "longDescription": "Open the user's configured Infinite Canvas deployment in Chrome, upload user-authorized local media as private asset nodes, inspect and precisely edit nodes, edges, groups, layout, and selections, then save, export, run, cancel, or retry the authenticated workflow without bypassing canvasStore. Read material-center options, generate titles and Tags, upload offline templates, retry failures, and inspect personal upload history through the authenticated browser.",
     "developerName": "Infinite Canvas Team",
     "category": "Productivity",
     "capabilities": ["Read", "Write", "Interactive"],
@@ -20,7 +20,8 @@
       "Add and connect nodes on my active Infinite Canvas.",
       "Repair incorrect connections, then save and export the selected workflow.",
       "Choose a suitable model and aspect ratio, then arrange the workflow cleanly.",
-      "Run selected nodes, cancel or retry failures when needed, and monitor the execution."
+      "Run selected nodes, cancel or retry failures when needed, and monitor the execution.",
+      "Generate titles and Tags for my canvas results, then upload them as offline material-center templates."
     ]
   },
   "mcpServers": "./.mcp.json"

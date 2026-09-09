@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { materialCenterTools, materialCenterActions, callMaterialCenterTool } from "./material-center-tools.mjs";
+
 import { createInterface } from "node:readline";
 import { randomUUID } from "node:crypto";
 import {
@@ -20,7 +22,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.18" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.19" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -358,6 +360,7 @@ async function writeWorkflowExport(outputPath, workflow, overwrite = false) {
 }
 
 const tools = [
+  ...materialCenterTools,
   {
     name: "pair_infinite_canvas",
     description:
@@ -674,6 +677,9 @@ const tools = [
 ];
 
 async function callTool(name, args) {
+  if (materialCenterActions.has(name)) {
+    return callMaterialCenterTool(name, args, sendCommand);
+  }
   if (name === "pair_infinite_canvas") {
     const apiUrl = normalizeApiUrl(args.api_url || DEFAULT_API_URL);
     const appUrl = normalizeAppUrl(

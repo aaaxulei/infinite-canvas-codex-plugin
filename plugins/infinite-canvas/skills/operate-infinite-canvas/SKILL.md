@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
+description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -150,6 +150,15 @@ Treat `delete_node`, `delete_edge`, `delete_edges_batch`, `disconnect_nodes`,
 confirmation unless the user already explicitly requested that exact destructive
 change. Retargeting one known incorrect edge does not require a second confirmation
 when it is the requested correction.
+
+## Material center
+
+For requests about automatic tagging, titles, uploading canvas results to the
+material center (素材中心 / 上线), or upload history, read
+[references/material-center.md](references/material-center.md). Use the dedicated
+material-center MCP tools through the authenticated browser bridge. A material
+upload creates an offline template; keep destination, per-item request IDs and
+submission authorization explicit.
 
 ## Execute
 

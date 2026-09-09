@@ -224,6 +224,7 @@ test("forwards execution control, save, status, and workflow export commands", a
         retry_batch_item: { execution_id: "exec-item", status: "running" },
         save_canvas: { saved: true, workflow_id: "workflow-1", revision: 7 },
         get_save_status: { persisted: true, dirty: false },
+        material_center: { job_id: "job-1", status: "running" },
         export_workflow: {
           filename: "group.workflow.json",
           node_count: 1,
@@ -294,6 +295,12 @@ test("forwards execution control, save, status, and workflow export commands", a
     [4, "save_canvas", { expected_revision: 7, name: "Saved" }],
     [5, "get_canvas_save_status", {}],
     [6, "export_canvas_workflow", { group_id: "group-1", output_path: outputPath }],
+    [7, "get_material_center_context", { target_environment: "prod", target_platform: "lovhub-web", node_ids: ["image-1"], expected_revision: 7 }],
+    [8, "generate_material_center_suggestions", { target_environment: "test", target_platform: "lovhub-web", kind: "tags", media: { media_kind: "video", source_url: "video.mp4" } }],
+    [9, "upload_material_center_templates", { idempotency_key: "upload-key-1", items: [{ request_id: "request-1", title: "Portrait" }] }],
+    [10, "get_material_center_job", { job_id: "job-1" }],
+    [11, "retry_material_center_uploads", { job_id: "job-1", idempotency_key: "retry-key-1" }],
+    [12, "get_material_center_history", { target_environment: "prod", limit: 10 }],
   ];
   for (const [id, name, args] of calls) {
     const response = await call(id, name, args);
@@ -307,9 +314,17 @@ test("forwards execution control, save, status, and workflow export commands", a
     "save_canvas",
     "get_save_status",
     "export_workflow",
+    ...Array(6).fill("material_center"),
   ]);
   assert.deepEqual(commandBodies[2].arguments, { node_id: "node-1", result_index: 2 });
   assert.deepEqual(commandBodies[5].arguments, { group_id: "group-1" });
+  assert.deepEqual(commandBodies.slice(6).map((body) => body.arguments.action), ["context", "suggest", "upload", "get_job", "retry_uploads", "history"]);
+  assert.equal(commandBodies[6].arguments.target_environment, "prod");
+  assert.deepEqual(commandBodies[7].arguments.media, { media_kind: "video", source_url: "video.mp4" });
+  assert.equal(commandBodies[8].idempotency_key, "upload-key-1");
+  assert.equal(commandBodies[8].arguments.items[0].request_id, "request-1");
+  assert.equal(commandBodies[10].idempotency_key, "retry-key-1");
+  assert.ok(!("idempotency_key" in commandBodies[8].arguments));
   const exported = JSON.parse(await readFile(outputPath, "utf8"));
   assert.equal(exported.workflowName, "Group");
   assert.equal(exported.snapshot.nodes[0].id, "node-1");
@@ -352,7 +367,8 @@ test("uses the selected deployment app URL and exposes the plugin version", asyn
   });
 
   const initialized = await call(1, "initialize", { protocolVersion: "2025-06-18" });
-  assert.equal(initialized.result.serverInfo.version, "0.1.18");
+  const manifest = JSON.parse(await readFile(join(dirname(scriptPath), "../.codex-plugin/plugin.json"), "utf8"));
+  assert.equal(initialized.result.serverInfo.version, manifest.version);
   const listed = await call(2, "tools/list", {});
   const toolNames = listed.result.tools.map((tool) => tool.name);
   for (const expected of [
@@ -362,6 +378,12 @@ test("uses the selected deployment app URL and exposes the plugin version", asyn
     "save_canvas",
     "get_canvas_save_status",
     "export_canvas_workflow",
+    "get_material_center_context",
+    "generate_material_center_suggestions",
+    "upload_material_center_templates",
+    "get_material_center_job",
+    "retry_material_center_uploads",
+    "get_material_center_history",
   ]) {
     assert.ok(toolNames.includes(expected), `missing MCP tool: ${expected}`);
   }

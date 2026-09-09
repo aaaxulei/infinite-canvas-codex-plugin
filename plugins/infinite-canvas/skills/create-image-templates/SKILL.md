@@ -237,6 +237,16 @@ Model prompt → Soul 2.0 temporary result → reusable effect prompt
 Keep each template in a clearly named group. Preserve unrelated canvas content.
 Never overwrite an accepted result when adding another model variant.
 
+## Material-center delivery when requested
+
+When the user also requests titles, automatic tagging or material-center uploads
+for the resulting templates, continue with
+[../operate-infinite-canvas/references/material-center.md](../operate-infinite-canvas/references/material-center.md).
+Use the approved result media and prompts, map model codes through the current
+material-center context, and keep the paid/free settings distinct. Uploading
+creates offline templates and is a separate requested action from generating
+proofs or free comparisons.
+
 ## Completion report
 
 For each completed stage, report:
