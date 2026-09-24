@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { downloadTool, downloadAsset } from "./asset-download.mjs";
+
 import { materialCenterTools, materialCenterActions, callMaterialCenterTool } from "./material-center-tools.mjs";
 
 import { createInterface } from "node:readline";
@@ -22,7 +24,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.19" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.21" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -360,6 +362,7 @@ async function writeWorkflowExport(outputPath, workflow, overwrite = false) {
 }
 
 const tools = [
+  downloadTool,
   ...materialCenterTools,
   {
     name: "pair_infinite_canvas",
@@ -711,6 +714,9 @@ async function callTool(name, args) {
   }
   if (name === "get_canvas_model_catalog") {
     return request("/agent/control/model-catalog");
+  }
+  if (name === "download_canvas_asset") {
+    return downloadAsset(args, await connection());
   }
   if (name === "upload_local_assets_to_canvas") {
     const resolvedSession = await resolveSession(args.session_id);

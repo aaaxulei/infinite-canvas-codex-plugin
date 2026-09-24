@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
+description: Open Infinite Canvas in Chrome, download requested original assets, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -87,6 +87,15 @@ batch.
 5. The upload creates durable private assets even if a later canvas mutation fails.
    Report any returned uploaded asset IDs so the user can recover them without
    uploading duplicates.
+
+## Download original results
+
+For requests to save/download a result locally, read
+[references/asset-download.md](references/asset-download.md) and use
+`download_canvas_asset`. This tool uses the existing pairing; ordinary asset URLs
+require browser login and cannot be fetched directly with an Agent Token.
+Download failure does not authorize replacing the requested footage, regenerating
+it, changing dialogue, or marking the task complete.
 
 ## Mutate
 

@@ -83,3 +83,11 @@ plugins/infinite-canvas/
     ├── operate-infinite-canvas/
     └── create-image-templates/
 ```
+
+## 原始素材下载（0.1.21）
+
+升级后可直接要求：“把这个成功的视频结果下载到指定本地目录，保留原始素材。”
+`download_canvas_asset` 复用已有有效配对，支持资产 ID、`asset://` 和同环境普通
+素材文件 URL，无需浏览器下载或重新配对。最大 2 GiB，失败可重试，不覆盖已有文件。
+当前不支持断点续传；字节数与 SHA-256 校验不等同于音视频完整解码验证。
+下载或权限失败会报告原因，不授权自动换素材或重新生成。

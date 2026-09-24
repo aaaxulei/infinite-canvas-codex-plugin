@@ -395,3 +395,47 @@ test("uses the selected deployment app URL and exposes the plugin version", asyn
   const result = JSON.parse(response.result.content[0].text);
   assert.match(result.error, /https:\/\/staging\.example\.test\//);
 });
+
+test('downloads a private asset via MCP without a live canvas session', async (context) => {
+  const id = '11111111-1111-1111-1111-111111111111';
+  let auth;
+  const server = createServer((request, response) => {
+    if (request.url === `/api/v1/assets/agent/${id}/file?download=true`) {
+      auth = request.headers.authorization;
+      response.writeHead(200, { 'content-type': 'video/mp4', 'content-length': '5' });
+      response.end('video');
+    } else writeJson(response, 404, {});
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  context.after(() => server.close());
+  const root = await mkdtemp(join(tmpdir(), 'ic-mcp-download-'));
+  context.after(() => rm(root, { recursive: true, force: true }));
+  const apiUrl = `http://127.0.0.1:${server.address().port}/api/v1`;
+  const child = spawn(process.execPath, [scriptPath], { env: {
+    ...process.env, INFINITE_CANVAS_API_URL: apiUrl,
+    INFINITE_CANVAS_APP_URL: `http://127.0.0.1:${server.address().port}`,
+    INFINITE_CANVAS_TOKEN: 'icx_pat_test',
+  }, stdio: ['pipe', 'pipe', 'pipe'] });
+  context.after(() => child.kill());
+  const { createInterface } = await import('node:readline');
+  const lines = createInterface({ input: child.stdout });
+  context.after(() => lines.close());
+  let sequence = 0;
+  const call = async (method, params) => {
+    const reply = once(lines, 'line');
+    child.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: ++sequence, method, params })+'\n');
+    return JSON.parse((await reply)[0]).result;
+  };
+  const init = await call('initialize', {});
+  const manifest = JSON.parse(await readFile(join(dirname(scriptPath), '../.codex-plugin/plugin.json'), 'utf8'));
+  assert.equal(init.serverInfo.version, manifest.version);
+  const listed = await call('tools/list', {});
+  assert.ok(listed.tools.some(tool => tool.name === 'download_canvas_asset'));
+  const output = join(root, 'original.mp4');
+  const result = await call('tools/call', { name: 'download_canvas_asset', arguments: { source: `${apiUrl}/assets/${id}/file`, output_path: output } });
+  assert.ok(!result.isError, JSON.stringify(result));
+  assert.equal(await readFile(output, 'utf8'), 'video');
+  assert.equal(auth, 'Bearer icx_pat_test');
+  assert.ok(!JSON.stringify(result).includes('icx_pat_test'));
+});

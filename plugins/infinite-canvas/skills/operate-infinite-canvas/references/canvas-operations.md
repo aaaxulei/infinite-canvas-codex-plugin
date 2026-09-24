@@ -52,6 +52,9 @@ For `videoProcess`, set `data.operation` to one of:
 | `extractAudio` | None |
 | `mergeAudio` | `audioAssetId` for a user-owned audio asset |
 | `captureFrame` | `captureTimeSec` |
+| `depth` | Requires access to `fal-ai/depth-anything-video`; preserves the provider defaults |
+
+Depth runs through the same queued generation API as the toolbar. Invalid Vibe MV audio (outside 10–360 seconds) is rejected before provider upload. Erase masks must be opaque black/white images matching the source dimensions; unselected pixels are preserved in the permanent result.
 
 The primary media can be supplied by a normal incoming connection or by
 `data.assetId`. Processing writes `resultAssetId`, `resultMediaType`, and
