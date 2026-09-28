@@ -24,7 +24,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.21" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.22" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -124,7 +124,7 @@ async function request(path, { method = "GET", body, authenticated = true, apiUr
   if (authenticated && !current.token) {
     throw new Error(
       `Infinite Canvas is not paired. Open ${current.appUrl} in Chrome, choose `
-      + "Infinite Canvas → user menu → 连接 Codex, then call pair_infinite_canvas "
+      + "Infinite Canvas → user menu → 连接 AI 助手（旧版：连接 Codex）, then call pair_infinite_canvas "
       + "with the displayed code.",
     );
   }
@@ -202,7 +202,7 @@ async function uploadLocalMedia(prepared) {
   if (!current.token) {
     throw new Error(
       `Infinite Canvas is not paired. Open ${current.appUrl} in Chrome, choose `
-      + "Infinite Canvas → user menu → 连接 Codex, then pair the plugin.",
+      + "Infinite Canvas → user menu → 连接 AI 助手（旧版：连接 Codex）, then pair the plugin.",
     );
   }
   const bytes = await readFile(prepared.filePath);
@@ -374,7 +374,7 @@ const tools = [
       properties: {
         pairing_code: {
           type: "string",
-          description: "One-time code from Infinite Canvas → user menu → 连接 Codex.",
+          description: "One-time code from Infinite Canvas → user menu → 连接 AI 助手（旧版：连接 Codex）.",
         },
         api_url: {
           type: "string",

@@ -29,5 +29,5 @@ do
 done
 
 echo "Infinite Canvas MCP: Node.js was not found." >&2
-echo "Install Node.js or set INFINITE_CANVAS_NODE to its absolute executable path, then restart Codex." >&2
+echo "Install Node.js or set INFINITE_CANVAS_NODE to its absolute executable path, then restart your AI client." >&2
 exit 127

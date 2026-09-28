@@ -1,0 +1,8 @@
+{
+  "name": "infinite-canvas",
+  "version": "0.1.22",
+  "description": "Operate live Infinite Canvas workflows, download assets, and prepare offline material-center templates from Claude Code.",
+  "author": {
+    "name": "Infinite Canvas Team"
+  }
+}

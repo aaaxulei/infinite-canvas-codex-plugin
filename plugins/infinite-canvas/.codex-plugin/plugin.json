@@ -1,6 +1,6 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "Operate live canvas workflows, download original assets locally, and prepare, tag, and upload offline material-center templates from Codex.",
   "author": {
     "name": "Infinite Canvas Team"
@@ -12,7 +12,11 @@
     "longDescription": "Open the user's configured Infinite Canvas deployment in Chrome, upload user-authorized local media as private asset nodes, inspect and precisely edit nodes, edges, groups, layout, and selections, then save, export, run, cancel, or retry the authenticated workflow without bypassing canvasStore. Read material-center options, generate titles and Tags, upload offline templates, retry failures, and inspect personal upload history through the authenticated browser.",
     "developerName": "Infinite Canvas Team",
     "category": "Productivity",
-    "capabilities": ["Read", "Write", "Interactive"],
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
     "defaultPrompt": [
       "Open Infinite Canvas in Chrome.",
       "Upload my local media files as connected canvas asset nodes.",
@@ -24,5 +28,20 @@
       "Generate titles and Tags for my canvas results, then upload them as offline material-center templates."
     ]
   },
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "infinite-canvas": {
+      "command": "/bin/sh",
+      "args": [
+        "./scripts/start-mcp.sh"
+      ],
+      "cwd": ".",
+      "env_vars": [
+        "INFINITE_CANVAS_API_URL",
+        "INFINITE_CANVAS_APP_URL",
+        "INFINITE_CANVAS_TOKEN",
+        "INFINITE_CANVAS_CONFIG",
+        "INFINITE_CANVAS_NODE"
+      ]
+    }
+  }
 }

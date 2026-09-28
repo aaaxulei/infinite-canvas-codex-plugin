@@ -25,14 +25,20 @@
 完成报告规则。撰写提示词或审核生成图前，必须阅读
 `references/prompt-and-qa.md`。
 
+本 Skill 同时支持 Codex 和 Claude Code；前者通过
+`$infinite-canvas:create-image-templates` 调用，后者通过
+`/infinite-canvas:create-image-templates` 调用。图片检查使用当前客户端实际可用的工具。
+插件不包含飞书授权或浏览器集成；缺少这些能力时使用下述替代路径，不假设 Codex 专属工具存在。
+
 ## 2. 阶段一：读取并索引参考资料
 
 ### 2.1 飞书文档读取
 
 当输入为飞书 `/docx/` 或 `/wiki/` 链接时：
 
-1. 加载并遵循 `lark-doc` Skill，包括 `lark-shared` 认证规则以及文档、媒体读取
-   规则。
+1. 如已安装，加载并遵循 `lark-doc` Skill，包括 `lark-shared` 认证规则以及文档、媒体读取
+   规则。未安装 Skill 但有 `lark-cli` 时，先通过 `lark-cli skills read lark-doc` 读取版本匹配的说明；
+   两者均不可用时使用可用的浏览器集成或请求导出的文档与参考图。
 2. 使用以下命令读取文档：
 
    ```bash

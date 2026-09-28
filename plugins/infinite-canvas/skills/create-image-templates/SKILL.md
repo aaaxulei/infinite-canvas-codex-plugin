@@ -14,16 +14,27 @@ layout, execution, and completion rules. Read
 [`references/prompt-and-qa.md`](references/prompt-and-qa.md) before writing prompts
 or reviewing generated images.
 
+## Client prerequisites
+
+This skill shares its workflow with Codex and Claude Code. In Claude Code invoke
+`/infinite-canvas:create-image-templates`; in Codex invoke
+`$infinite-canvas:create-image-templates`. Resolve companion files relative to this
+skill's directory, not the project working directory. Use the host's available
+image-reading tools to inspect source images and results; do not assume Codex-only
+tools are available. The plugin bundles canvas tools, not Feishu authentication or
+browser integrations. If those are unavailable, use the alternatives below.
+
 ## Workflow
 
 ### 1. Read and index the references
 
 For a Feishu/Lark `/docx/` or `/wiki/` URL:
 
-1. Load and follow the available `lark-doc` skill, including its required
-   `lark-shared` authentication rules and fetch/media references. When using the
-   CLI, read its version-matched instructions with `lark-cli skills read lark-doc`
-   and the referenced fetch/media files before choosing flags.
+1. If installed, load and follow `lark-doc` and its `lark-shared` authentication
+   and media instructions. Otherwise, when `lark-cli` is available, read its
+   version-matched instructions with `lark-cli skills read lark-doc` and the
+   referenced fetch/media files before choosing flags. If neither is available,
+   use the browser/export fallback below rather than attempting missing tools.
 2. Read the document with
    `lark-cli docs +fetch --as user --doc "<URL>"`. A `/wiki/` URL is a supported
    document source; do not stop at the Wiki container.
@@ -41,8 +52,8 @@ For a Feishu/Lark `/docx/` or `/wiki/` URL:
 
 If `lark-cli` is unavailable, authentication or permission fails, or document
 media cannot be retrieved, do not continue from partial text while claiming the
-source was fully read. Follow the `lark-shared` authorization flow first. If that
-path remains unavailable, use a logged-in Chrome session to inspect the complete
+source was fully read. Follow the `lark-shared` authorization flow when available.
+If that path remains unavailable, use an available browser integration with a logged-in Chrome session to inspect the complete
 document and all reference images. If neither path can provide complete access,
 stop before generation and ask the user to grant access, export the document, or
 attach the missing images.

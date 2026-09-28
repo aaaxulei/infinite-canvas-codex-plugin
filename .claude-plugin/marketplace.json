@@ -1,0 +1,16 @@
+{
+  "name": "aaaxulei",
+  "owner": {
+    "name": "Infinite Canvas Team"
+  },
+  "plugins": [
+    {
+      "name": "infinite-canvas",
+      "source": "./plugins/infinite-canvas",
+      "description": "Control live Infinite Canvas workflows through MCP."
+    }
+  ],
+  "metadata": {
+    "description": "Infinite Canvas MCP tools and shared workflow skills for Claude Code."
+  }
+}

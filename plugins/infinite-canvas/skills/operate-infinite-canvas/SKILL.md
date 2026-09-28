@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, download requested original assets, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair Codex with Infinite Canvas.
+description: Open Infinite Canvas in Chrome, download requested original assets, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex or Claude Code to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair an AI client with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -8,44 +8,56 @@ description: Open Infinite Canvas in Chrome, download requested original assets,
 Use the `infinite-canvas` MCP tools. Do not edit browser storage, call internal APIs
 directly, or manipulate React Flow through generic browser automation.
 
+## Client support
+
+The MCP server and these instructions support both Codex and Claude Code. Use the
+actual tool names exposed by the host; MCP namespace prefixes can differ.
+In Codex invoke `$infinite-canvas:operate-infinite-canvas`; in Claude Code invoke
+`/infinite-canvas:operate-infinite-canvas`. The template skill follows the same
+host-specific prefix. `agents/openai.yaml` is Codex UI metadata, not a dependency
+for Claude Code.
+
+Codex keeps its default credentials in `~/.config/infinite-canvas/codex.json`.
+The Claude Code plugin uses `~/.config/infinite-canvas/claude-code.json`.
+Pair each client separately. Never copy tokens into chat, source files, or MCP
+configuration. `INFINITE_CANVAS_CONFIG` can select a separate environment profile.
+
 ## Open
 
 Use the deployment selected by the user or pairing information. The standard
 local default is **http://localhost:8899/**; production, staging, and regional
 deployments must keep their own application/API URLs and credentials.
 
-When the user asks to open, show, visit, or go to Infinite Canvas or the canvas:
+When asked to open the canvas, reuse a Chrome tab at the exact deployment URL or
+open one using browser tools available in the current host. Follow an available
+Chrome-control skill when present. Do not assume Codex browser tools or
+`chrome:control-chrome` exist in Claude Code. Without a browser integration, a
+platform URL opener may open the exact URL (safely quote it as an argument), or
+provide the link for the user to open and log in. Do not claim successful browser
+navigation without evidence. If the request is only to open the canvas, finish
+there; opening the site does not require pairing.
 
-1. Choose the exact URL named by the user. If none is named, use the configured
-   deployment URL; only fall back to the local development default when no
-   managed environment is selected.
-2. Load and follow the available Chrome browser control skill
-   (`chrome:control-chrome` when plugin-prefixed), then navigate the user's Chrome
-   to the exact canonical URL above. Treat this as explicit Chrome intent even when
-   the user did not name a browser.
-3. Reuse and focus an existing Chrome tab at that URL when practical; otherwise
-   open a new Chrome tab.
-4. Do not substitute the in-app browser, web search, a shell `open` command, or the
-   canvas MCP tools for this navigation.
-5. If the request is only to open the canvas, finish after successful navigation.
-   Opening the site does not require pairing.
-
-If the same request also asks to inspect or change the canvas, open it in Chrome
-first, then continue with pairing or the read-before-writing flow below.
+For canvas operations, an already online authenticated canvas is sufficient;
+missing browser automation must not block MCP operations. Use MCP for all canvas
+reads and mutations; do not manipulate React Flow through browser automation.
 
 ## Pair
 
 If tools report that the plugin is not paired:
 
-1. If Infinite Canvas is not already open, open the canonical URL in Chrome using
-   the flow above.
-2. Ask the user to choose **Infinite Canvas → user menu → 连接 Codex**.
-3. Ask for the displayed one-time code.
-4. Call `pair_infinite_canvas`. Use the default API URL only for standard local
-   development. For staging, production, or a regional environment, pass both
-   that deployment's `api_url` and `app_url`; never reuse another environment's
-   pairing token.
-5. Never repeat or expose the returned token. The MCP server stores it itself.
+1. Open the configured deployment or provide its link using the flow above.
+2. Ask the user to choose **Infinite Canvas → user menu → 连接 AI 助手**, select
+   their client, and generate a one-time code. Older apps call this **连接 Codex**;
+   that entry also works for Claude Code, though its token label may say Codex.
+3. Use the complete connection information copied by the user. Call
+   `pair_infinite_canvas` with `pairing_code`, `api_url`, and `app_url`. Only use
+   local defaults when the user is connecting to standard local development.
+   Never reuse another environment's pairing token.
+4. The MCP server stores the token itself. Report pairing success without reading
+   or displaying credentials. Confirm access with `list_canvas_sessions`.
+5. If no session is online, ask the user to open a canvas and keep it logged in.
+   In Claude Code, `/mcp` diagnoses server loading; pairing does not install the
+   plugin or start the browser.
 
 ## Read before writing
 
