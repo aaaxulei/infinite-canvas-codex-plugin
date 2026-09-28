@@ -1,12 +1,22 @@
 ---
 name: operate-infinite-canvas
-description: Open Infinite Canvas in Chrome, download requested original assets, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex or Claude Code to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair an AI client with Infinite Canvas.
+description: Generate images, videos, or audio directly without canvas nodes, or open Infinite Canvas in Chrome, download requested original assets, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex or Claude Code to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair an AI client with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
 
 Use the `infinite-canvas` MCP tools. Do not edit browser storage, call internal APIs
 directly, or manipulate React Flow through generic browser automation.
+
+## Choose direct generation or a canvas workflow
+
+For standalone generation or an explicit request to avoid nodes, follow
+[references/direct-generation.md](references/direct-generation.md). Use
+`get_generation_model_catalog`, `upload_generation_asset`, `submit_generation`,
+`get_generation`, and `cancel_generation`. After initial pairing these tools need
+no online browser. Do not require snapshots/revisions or create nodes for this path.
+
+For live canvas editing or connected workflows, follow the canvas rules below.
 
 ## Client support
 
@@ -54,8 +64,9 @@ If tools report that the plugin is not paired:
    local defaults when the user is connecting to standard local development.
    Never reuse another environment's pairing token.
 4. The MCP server stores the token itself. Report pairing success without reading
-   or displaying credentials. Confirm access with `list_canvas_sessions`.
-5. If no session is online, ask the user to open a canvas and keep it logged in.
+   or displaying credentials. Confirm direct-generation access with
+   `get_generation_model_catalog`, or canvas access with `list_canvas_sessions`.
+5. For canvas operations only, if no session is online, ask the user to open a canvas and keep it logged in.
    In Claude Code, `/mcp` diagnoses server loading; pairing does not install the
    plugin or start the browser.
 

@@ -4,6 +4,20 @@ import { isAbsolute } from 'node:path';
 
 class DownloadError extends Error {}
 
+function safeNetworkCode(error, depth = 0) {
+  if (!error || depth > 4) return null;
+  const allowed = new Set(['ENOTFOUND', 'EAI_AGAIN', 'ETIMEDOUT', 'ECONNREFUSED',
+    'ECONNRESET', 'ENETUNREACH', 'EHOSTUNREACH', 'UND_ERR_CONNECT_TIMEOUT',
+    'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT', 'UND_ERR_SOCKET',
+    'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'DEPTH_ZERO_SELF_SIGNED_CERT']);
+  if (allowed.has(error.code)) return error.code;
+  for (const cause of [error.cause, ...(Array.isArray(error.errors) ? error.errors : [])]) {
+    const code = safeNetworkCode(cause, depth + 1);
+    if (code) return code;
+  }
+  return null;
+}
+
 export const downloadTool = {
   name: 'download_canvas_asset',
   description: 'Download an original owned/public Infinite Canvas asset to an authorized absolute local path using the paired token. Accepts an asset UUID, asset:// reference, or same-deployment /assets/{id}/file URL from a fresh snapshot. No browser session required. Never overwrites files. Returns byte count and SHA-256, not media decoding verification.',
@@ -51,10 +65,12 @@ export async function downloadAsset(args, current, fetchImpl = fetch) {
   const signal = AbortSignal.timeout(10 * 60 * 1000);
   let response;
   let stage = 'request';
+  let host;
   try {
     let url = new URL(`${current.apiUrl.replace(/\/+$/, '')}/assets/agent/${assetId}/file?download=true`);
     const origin = url.origin;
     for (let hop = 0; ; hop++) {
+      host = url.hostname;
       response = await fetchImpl(url, {
         redirect: 'manual', signal,
         headers: { 'Accept-Encoding': 'identity', ...(hop === 0 ? { Authorization: `Bearer ${current.token}` } : {}) },
@@ -103,7 +119,10 @@ export async function downloadAsset(args, current, fetchImpl = fetch) {
   } catch (error) {
     // Network errors may embed signed storage URLs; never return their raw messages.
     if (error.code === 'EEXIST') throw new DownloadError('Destination already exists; choose a new output_path.');
-    if (error instanceof TypeError || signal.aborted) throw new DownloadError(`Download failed during ${stage}; network interruption or timeout. Retry the same source. No replacement was generated.`);
+    if (error instanceof TypeError || signal.aborted) {
+      const code = signal.aborted ? 'TIMEOUT' : safeNetworkCode(error) || 'NETWORK_ERROR';
+      throw new DownloadError(`Download failed during ${stage} (${code}, host: ${host}); check DNS and IPv4/IPv6 connectivity in the plugin process, then retry the same source. No replacement was generated.`);
+    }
     if (error instanceof DownloadError) throw error;
     throw new DownloadError(`Download failed during ${stage}; retry the same source after checking connectivity and destination access. No replacement was generated.`);
   } finally {

@@ -69,6 +69,22 @@ test('never overwrites a destination, including one created during streaming', a
   assert.deepEqual(await readdir(args.dir), ['original.mp4']);
 });
 
+test('reports nested network codes and hostname without leaking signed URLs or tokens', async (t) => {
+  const args = await destination(t);
+  let calls = 0;
+  await assert.rejects(downloadAsset(args, current, async () => {
+    if (++calls === 1) return new Response(null, { status: 307,
+      headers: { location: 'https://storage.example/private-key?secret=signature' } });
+    const cause = new AggregateError([Object.assign(new Error('private-key secret=signature icx_pat_secret'), { code: 'ETIMEDOUT' })]);
+    throw new TypeError('fetch failed: secret=signature', { cause });
+  }), error => {
+    assert.match(error.message, /ETIMEDOUT, host: storage\.example/);
+    assert.doesNotMatch(error.message, /signature|private-key|icx_pat_secret/);
+    return true;
+  });
+  assert.deepEqual(await readdir(args.dir), []);
+});
+
 test('rejects unpaired calls and invalid destinations without fetching', async (t) => {
   const args = await destination(t);
   const noFetch = async () => { throw new Error('must not fetch'); };

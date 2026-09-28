@@ -1,15 +1,15 @@
 {
   "name": "infinite-canvas",
-  "version": "0.1.22",
-  "description": "Operate live canvas workflows, download original assets locally, and prepare, tag, and upload offline material-center templates from Codex.",
+  "version": "0.1.24",
+  "description": "Operate live canvas workflows or generate media directly without canvas nodes, download assets, and prepare offline material-center templates.",
   "author": {
     "name": "Infinite Canvas Team"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Infinite Canvas",
-    "shortDescription": "Canvas workflows, asset downloads, and material uploads",
-    "longDescription": "Open the user's configured Infinite Canvas deployment in Chrome, upload user-authorized local media as private asset nodes, inspect and precisely edit nodes, edges, groups, layout, and selections, then save, export, run, cancel, or retry the authenticated workflow without bypassing canvasStore. Read material-center options, generate titles and Tags, upload offline templates, retry failures, and inspect personal upload history through the authenticated browser.",
+    "shortDescription": "Direct media generation and live canvas workflows",
+    "longDescription": "Generate images, videos, and audio directly through the authenticated queue without canvas nodes, or open the user's configured Infinite Canvas deployment in Chrome, upload user-authorized local media as private asset nodes, inspect and precisely edit nodes, edges, groups, layout, and selections, then save, export, run, cancel, or retry the authenticated workflow without bypassing canvasStore. Read material-center options, generate titles and Tags, upload offline templates, retry failures, and inspect personal upload history through the authenticated browser.",
     "developerName": "Infinite Canvas Team",
     "category": "Productivity",
     "capabilities": [
@@ -18,6 +18,7 @@
       "Interactive"
     ],
     "defaultPrompt": [
+      "Generate media directly without creating canvas nodes, then download the result.",
       "Open Infinite Canvas in Chrome.",
       "Upload my local media files as connected canvas asset nodes.",
       "Inspect my active Infinite Canvas and summarize its workflow.",

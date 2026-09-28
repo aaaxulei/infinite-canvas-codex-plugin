@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 
+import { setDefaultResultOrder } from "node:dns";
+
+// Native clients may inherit an IPv6 route that resolves but cannot connect.
+// Prefer IPv4 when both exist, while retaining support for IPv6-only hosts.
+setDefaultResultOrder("ipv4first");
+
+import { generationTools, callGenerationTool } from "./generation-tools.mjs";
+
 import { downloadTool, downloadAsset } from "./asset-download.mjs";
 
 import { materialCenterTools, materialCenterActions, callMaterialCenterTool } from "./material-center-tools.mjs";
@@ -24,7 +32,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.22" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.24" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -154,7 +162,11 @@ async function parseResponse(response) {
       typeof parsed?.detail === "string"
         ? parsed.detail
         : `${response.status} ${response.statusText}`;
-    throw new Error(detail);
+    const error = new Error(detail);
+    error.httpStatus = response.status;
+    const retry = Number(response.headers.get("Retry-After"));
+    if (Number.isFinite(retry) && retry > 0) error.retryAfterSeconds = retry;
+    throw error;
   }
   return parsed;
 }
@@ -197,7 +209,7 @@ async function prepareLocalMedia(spec) {
   };
 }
 
-async function uploadLocalMedia(prepared) {
+async function uploadLocalMedia(prepared, path = "/agent/control/assets/upload") {
   const current = await connection();
   if (!current.token) {
     throw new Error(
@@ -213,7 +225,7 @@ async function uploadLocalMedia(prepared) {
     prepared.filename,
   );
   const response = await fetch(
-    `${normalizeApiUrl(current.apiUrl)}/agent/control/assets/upload`,
+    `${normalizeApiUrl(current.apiUrl)}${path}`,
     {
       method: "POST",
       headers: { Authorization: `Bearer ${current.token}` },
@@ -362,6 +374,7 @@ async function writeWorkflowExport(outputPath, workflow, overwrite = false) {
 }
 
 const tools = [
+  ...generationTools,
   downloadTool,
   ...materialCenterTools,
   {
@@ -680,6 +693,9 @@ const tools = [
 ];
 
 async function callTool(name, args) {
+  if (generationTools.some(tool => tool.name === name)) {
+    return callGenerationTool(name, args, { request, prepareLocalMedia, uploadLocalMedia });
+  }
   if (materialCenterActions.has(name)) {
     return callMaterialCenterTool(name, args, sendCommand);
   }
@@ -940,7 +956,12 @@ async function handleMessage(message) {
         jsonrpc: "2.0",
         id,
         result: toolResult(
-          { error: error instanceof Error ? error.message : String(error) },
+          {
+            error: error instanceof Error ? error.message : String(error),
+            ...(error.httpStatus ? { http_status: error.httpStatus } : {}),
+            ...(error.retryAfterSeconds ? { retry_after_seconds: error.retryAfterSeconds } : {}),
+            ...(error.requestId ? { request_id: error.requestId, recovery: "Query get_generation with this request_id before retrying; never replace it because of a transport failure." } : {}),
+          },
           true,
         ),
       };

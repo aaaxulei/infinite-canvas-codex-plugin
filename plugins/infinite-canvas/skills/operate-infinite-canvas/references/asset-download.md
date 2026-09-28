@@ -40,3 +40,12 @@ original result. On 429, retry later without changing the source. On interruptio
 retry the same source to a free destination. If automatic approval review rejects
 an action, explain the rejected action and the provided reason; do not bypass the
 rejection, hide it, or manufacture replacement content to make the task appear done.
+
+Agent asset reads use a short-lived signed Spaces origin URL, so downloads do not
+require the browser CDN route. Plugin 0.1.24 prefers IPv4 for dual-stack hosts
+while still allowing IPv6-only hosts. Network failures include only a known error
+code and hostname, never a signed path/query or token. After a plugin update,
+restart its MCP connection so the new DNS ordering takes effect. For ETIMEDOUT,
+ENETUNREACH or ENOTFOUND, check the failing hostname from the plugin process;
+a successful connection to a different storage/CDN hostname is not sufficient.
+Do not rewrite signed links, disable TLS verification or regenerate the asset.

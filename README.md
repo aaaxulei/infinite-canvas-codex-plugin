@@ -1,6 +1,6 @@
 # Infinite Canvas Plugin — Codex / Claude Code
 
-让 Codex 或 Claude Code 安全连接并操作用户当前打开的 Infinite Canvas 画布。
+让 Codex 或 Claude Code 直接生成图片、视频、音频，也可安全操作用户当前打开的 Infinite Canvas 画布。
 
 本仓库只包含 AI 客户端 Plugin、MCP Server 和操作 Skill，不包含 Infinite Canvas
 业务源码、用户数据或服务端密钥。
@@ -18,7 +18,7 @@
 绝对路径。
 
 Claude Code 用户需要本机 Node.js 18 或更新版本（macOS/Linux；Windows 使用 WSL）。
-两端共用相同的 MCP 工具和工作流 Skills，版本为 **0.1.22**。
+两端共用相同的 MCP 工具和工作流 Skills，版本为 **0.1.24**。
 
 ### Codex
 
@@ -63,7 +63,7 @@ claude plugin update infinite-canvas@aaaxulei
 
 ## 连接画布
 
-1. 打开并登录你要操作的 Infinite Canvas 环境，保持画布标签页打开。
+1. 打开并登录目标 Infinite Canvas 环境。配对后直接生成无需保持画布在线；操作节点时需要在线画布。
 2. 点击右上角头像，选择 **连接 AI 助手**，再选择客户端。旧版应用的入口仍为 **连接 Codex**，同样支持 Claude Code 配对。
 3. 生成一次性配对码并复制完整连接信息。
 4. 将包含一次性配对码、API 地址和应用地址的完整连接信息发送给所选客户端。
@@ -74,7 +74,7 @@ claude plugin update infinite-canvas@aaaxulei
 各自撤销不会影响另一端；不要复制或分享 Token。多环境使用 `INFINITE_CANVAS_CONFIG`
 选择独立文件，默认每个客户端文件只保留最近一次配对。
 
-插件更新可直接配合旧版应用使用。网页新增客户端选择入口需要另行部署应用；
+画布工具兼容旧版应用；直接生成需要后端提供 `/api/v1/ai/agent`。网页客户端选择入口和源站下载修复需要部署应用；
 发布插件不代表已部署网页。Claude Code 缺少浏览器控制工具时，可由用户手动打开画布，
 已有在线画布仍可经 MCP 操作。
 
@@ -118,13 +118,20 @@ plugins/infinite-canvas/
     └── create-image-templates/
 ```
 
-## 原始素材下载（0.1.21）
+## 直接生成（0.1.23+）
+
+无需搭建节点：先用 `get_generation_model_catalog` 查询可用模型，按需使用
+`upload_generation_asset` 上传参考素材，再用 `submit_generation` 提交生成，
+`get_generation` 查询结果，`cancel_generation` 取消任务。相同请求重试保留
+`request_id`，配对后无需浏览器在线。仍使用本人模型权限、队列、并发和历史记录。
+
+## 原始素材下载（0.1.24）
 
 升级后可直接要求：“把这个成功的视频结果下载到指定本地目录，保留原始素材。”
 `download_canvas_asset` 复用已有有效配对，支持资产 ID、`asset://` 和同环境普通
 素材文件 URL，无需浏览器下载或重新配对。最大 2 GiB，失败可重试，不覆盖已有文件。
 当前不支持断点续传；字节数与 SHA-256 校验不等同于音视频完整解码验证。
-下载或权限失败会报告原因，不授权自动换素材或重新生成。
+下载或权限失败会报告原因，不授权自动换素材或重新生成。新版 Agent 下载使用短时签名的 Spaces 源站链接；插件优先 IPv4 并返回脱敏网络错误码，避免仅浏览器 CDN 可达性导致下载失败。
 
 ## 验证与来源
 
