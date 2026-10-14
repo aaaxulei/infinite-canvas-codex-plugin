@@ -18,7 +18,7 @@
 绝对路径。
 
 Claude Code 用户需要本机 Node.js 18 或更新版本（macOS/Linux；Windows 使用 WSL）。
-两端共用相同的 MCP 工具和工作流 Skills，版本为 **0.1.24**。
+两端共用相同的 MCP 工具和工作流 Skills，版本为 **0.1.25**。
 
 ### Codex
 
@@ -132,6 +132,16 @@ plugins/infinite-canvas/
 素材文件 URL，无需浏览器下载或重新配对。最大 2 GiB，失败可重试，不覆盖已有文件。
 当前不支持断点续传；字节数与 SHA-256 校验不等同于音视频完整解码验证。
 下载或权限失败会报告原因，不授权自动换素材或重新生成。新版 Agent 下载使用短时签名的 Spaces 源站链接；插件优先 IPv4 并返回脱敏网络错误码，避免仅浏览器 CDN 可达性导致下载失败。
+
+## 投放视频（0.1.25）
+
+一张图片直接生成 6 秒竖版 ASMR 投放视频，提示词、9:16 画幅、720p 档分辨率由服务端固定：
+先用 `list_advertising_video_models` 查看本账号可用的三选一模型（H3 Max、Seedance 2.0
+海外版、Seedance 2.0 Fast），用 `upload_generation_asset` 上传图片，再用
+`create_advertising_video` 提交 `request_id` 与 `asset_id`，`get_advertising_video` 轮询，
+`retry_advertising_video` 重试失败或待复核项，`cancel_advertising_video` 取消。`needs_review`
+表示图片没有可靠的清理对象，不计费。需要应用后端同步升级到含 `/ai/agent/advertising-videos`
+路由的版本。
 
 ## 验证与来源
 

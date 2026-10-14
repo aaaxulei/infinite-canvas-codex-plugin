@@ -7,6 +7,7 @@ import { setDefaultResultOrder } from "node:dns";
 setDefaultResultOrder("ipv4first");
 
 import { generationTools, callGenerationTool } from "./generation-tools.mjs";
+import { advertisingVideoTools, callAdvertisingVideoTool } from "./advertising-video-tools.mjs";
 
 import { downloadTool, downloadAsset } from "./asset-download.mjs";
 
@@ -32,7 +33,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.24" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.25" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -375,6 +376,7 @@ async function writeWorkflowExport(outputPath, workflow, overwrite = false) {
 
 const tools = [
   ...generationTools,
+  ...advertisingVideoTools,
   downloadTool,
   ...materialCenterTools,
   {
@@ -696,6 +698,9 @@ async function callTool(name, args) {
   if (generationTools.some(tool => tool.name === name)) {
     return callGenerationTool(name, args, { request, prepareLocalMedia, uploadLocalMedia });
   }
+  if (advertisingVideoTools.some(tool => tool.name === name)) {
+    return callAdvertisingVideoTool(name, args, { request });
+  }
   if (materialCenterActions.has(name)) {
     return callMaterialCenterTool(name, args, sendCommand);
   }
@@ -960,7 +965,7 @@ async function handleMessage(message) {
             error: error instanceof Error ? error.message : String(error),
             ...(error.httpStatus ? { http_status: error.httpStatus } : {}),
             ...(error.retryAfterSeconds ? { retry_after_seconds: error.retryAfterSeconds } : {}),
-            ...(error.requestId ? { request_id: error.requestId, recovery: "Query get_generation with this request_id before retrying; never replace it because of a transport failure." } : {}),
+            ...(error.requestId ? { request_id: error.requestId, recovery: "Query get_generation or get_advertising_video with this request_id before retrying; never replace it because of a transport failure." } : {}),
           },
           true,
         ),

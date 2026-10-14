@@ -16,6 +16,11 @@ For standalone generation or an explicit request to avoid nodes, follow
 `get_generation`, and `cancel_generation`. After initial pairing these tools need
 no online browser. Do not require snapshots/revisions or create nodes for this path.
 
+For a 投放视频 (one picture → 6 s portrait ASMR advertising video, prompt written by
+the server), follow [references/advertising-video.md](references/advertising-video.md)
+and use `list_advertising_video_models`, `create_advertising_video`,
+`get_advertising_video`, `retry_advertising_video`, and `cancel_advertising_video`.
+
 For live canvas editing or connected workflows, follow the canvas rules below.
 
 ## Client support
