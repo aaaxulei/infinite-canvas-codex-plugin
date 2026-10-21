@@ -21,9 +21,11 @@ analyses the image, writes the prompt and queues a 6 s portrait video. Do not us
    `running` → `succeeded` / `failed` / `cancelled`, plus `needs_review` when the
    model found no reliable cleaning target (nothing is charged; ask the user for a
    different picture). `plan` and `prompt` show what the server decided.
-5. On `succeeded`, `video_url` is usable immediately; `assets[*].asset_ref`
-   appears after archival and works with `download_canvas_asset`. Archive failure
-   does not mean generation failed; never regenerate just to obtain an asset.
+5. On `succeeded`, `video_url` is usable immediately: the upstream link at first,
+   then the permanent public CDN link once archived (`archive_status=complete`).
+   `download_url` is the token-protected download entry and `assets[*].asset_ref`
+   works with `download_canvas_asset`. Archive failure does not mean generation
+   failed; never regenerate just to obtain an asset.
 6. `retry_advertising_video` re-analyses a `needs_review`/`failed` analysis or
    re-submits a failed generation with the saved prompt. `cancel_advertising_video`
    ends an analysing job without generation, or cancels the queued generation.

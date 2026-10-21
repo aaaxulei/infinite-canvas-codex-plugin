@@ -33,7 +33,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.25" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.26" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
