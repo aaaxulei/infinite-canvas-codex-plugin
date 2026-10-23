@@ -18,7 +18,7 @@
 绝对路径。
 
 Claude Code 用户需要本机 Node.js 18 或更新版本（macOS/Linux；Windows 使用 WSL）。
-两端共用相同的 MCP 工具和工作流 Skills，版本为 **0.1.26**。
+两端共用相同的 MCP 工具和工作流 Skills，版本为 **0.1.27**。
 
 ### Codex
 
@@ -152,6 +152,16 @@ plugins/infinite-canvas/
 最多 6 次尝试、总时长 20 分钟。结果新增 `source`（实际线路）、`attempts` 与 `resumed`，
 失败信息只含线路名、域名与错误码。升级后需重连 MCP 进程。CDN 候选要求应用后端包含
 `/assets/agent/{asset_id}/download-links` 路由。
+
+## 素材库完整列表与批量导出（0.1.27）
+
+`list_library_categories` 读取公共（或本人个人）素材库分类与各分类素材数；`list_library_assets`
+按分类、类型、文件名游标分页读取完整列表（每页最多 200，含 `total`）；`export_library_assets`
+把筛选范围内全部原图下载到本地空目录，按分类分文件夹，并写入
+`infinite-canvas-library-manifest.json` 清单（素材 ID、分类、路径、字节数、SHA-256）。导出在
+MCP 进程后台进行，每次调用最多等待 50 秒并返回进度，重复以相同参数调用直到 `complete` 为
+true；失败项再次调用时重试，不覆盖已有文件。需要压缩包时在完成后自行打包该目录。
+要求应用后端包含 `/assets/agent/library` 路由，升级后需重连 MCP 进程。
 
 ## 验证与来源
 

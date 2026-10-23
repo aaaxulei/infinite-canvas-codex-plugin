@@ -1,6 +1,6 @@
 ---
 name: operate-infinite-canvas
-description: Generate images, videos, or audio directly without canvas nodes, or open Infinite Canvas in Chrome, download requested original assets, upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex or Claude Code to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair an AI client with Infinite Canvas.
+description: Generate images, videos, or audio directly without canvas nodes, or open Infinite Canvas in Chrome, download requested original assets, list or bulk-export the public or personal asset library by category (e.g. "打包下载全部模特素材"), upload user-authorized local media, or inspect, edit, connect, group, arrange, save, export, clear, and execute nodes on a user's live Infinite Canvas browser canvas through the infinite-canvas MCP server. Use when the user asks Codex or Claude Code to open, show, visit, view, understand, modify, build, organize, save, export, or run an Infinite Canvas workflow; choose models, prompts, or aspect ratios for canvas generation; clean up and focus a completed canvas task; also read material-center options, generate titles and Tags, upload offline templates, retry failed uploads, and inspect personal upload history; including requests such as "打开画布" or "打开 Infinite Canvas"; or pair an AI client with Infinite Canvas.
 ---
 
 # Operate Infinite Canvas
@@ -124,6 +124,14 @@ For requests to save/download a result locally, read
 require browser login and cannot be fetched directly with an Agent Token.
 Download failure does not authorize replacing the requested footage, regenerating
 it, changing dialogue, or marking the task complete.
+
+## Export the asset library
+
+For requests to list, count or download the public (or personal) asset library or
+one of its categories (e.g. "all 模特 images"), read
+[references/library-export.md](references/library-export.md). Use
+`list_library_categories`, `list_library_assets` and `export_library_assets`; do not
+page the canvas asset panel, which loads only 50 items at a time.
 
 ## Mutate
 

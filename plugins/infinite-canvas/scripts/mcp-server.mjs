@@ -10,6 +10,7 @@ import { generationTools, callGenerationTool } from "./generation-tools.mjs";
 import { advertisingVideoTools, callAdvertisingVideoTool } from "./advertising-video-tools.mjs";
 
 import { downloadTool, downloadAsset } from "./asset-download.mjs";
+import { libraryTools, callLibraryTool } from "./library-tools.mjs";
 
 import { materialCenterTools, materialCenterActions, callMaterialCenterTool } from "./material-center-tools.mjs";
 
@@ -33,7 +34,7 @@ import {
 } from "node:path";
 import { homedir } from "node:os";
 
-const SERVER_INFO = { name: "infinite-canvas", version: "0.1.26" };
+const SERVER_INFO = { name: "infinite-canvas", version: "0.1.27" };
 const DEFAULT_CANVAS_APP_URL = "http://localhost:8899/";
 const DEFAULT_API_URL = "http://127.0.0.1:18000/api/v1";
 const MAX_LOCAL_ASSET_BYTES = 512 * 1024 * 1024;
@@ -378,6 +379,7 @@ const tools = [
   ...generationTools,
   ...advertisingVideoTools,
   downloadTool,
+  ...libraryTools,
   ...materialCenterTools,
   {
     name: "pair_infinite_canvas",
@@ -700,6 +702,12 @@ async function callTool(name, args) {
   }
   if (advertisingVideoTools.some(tool => tool.name === name)) {
     return callAdvertisingVideoTool(name, args, { request });
+  }
+  if (libraryTools.some(tool => tool.name === name)) {
+    return callLibraryTool(name, args, {
+      request,
+      download: async downloadArgs => downloadAsset(downloadArgs, await connection()),
+    });
   }
   if (materialCenterActions.has(name)) {
     return callMaterialCenterTool(name, args, sendCommand);
